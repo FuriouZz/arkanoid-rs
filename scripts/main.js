@@ -1,8 +1,15 @@
-import { ExportInterface } from "./export-interface.js"
+import { WASM } from "./wasm.js"
+import { Renderer } from "./renderer.js"
 
 async function main() {
-  const x = await ExportInterface.load('./target/wasm32-unknown-unknown/debug/arkanoid-rust.wasm')
-  x.instance.exports.main()
+
+  // Load WASM
+  const w = await WASM.load('./target/wasm32-unknown-unknown/debug/arkanoid-rust.wasm')
+
+  // Create canvas context
+  w.renderer = new Renderer()
+
+  w.exports.main()
 }
 
 window.addEventListener('DOMContentLoaded', main)

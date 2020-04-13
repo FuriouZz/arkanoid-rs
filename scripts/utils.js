@@ -38,3 +38,10 @@ export async function load_wasm(path, importObject) {
   const bytes = await r0.arrayBuffer()
   return WebAssembly.instantiate(bytes, importObject)
 }
+
+export function bind(obj, thisArg) {
+  Object.entries(obj).forEach(([key, value]) => {
+    if (typeof value === "function") obj[key] = value.bind(thisArg)
+  })
+  return obj
+}
