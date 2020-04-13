@@ -28,7 +28,12 @@ export function decode_utf8(bytes) {
   return s;
 }
 
-export async function load_wasm(path: string, importObject: Record<string, Record<string, WebAssembly.ImportValue>>) {
+/**
+ *
+ * @param {string} path
+ * @param {Record<string, Record<string, WebAssembly.ImportValue>>} importObject
+ */
+export async function load_wasm(path, importObject) {
   const r0 = await fetch(path)
   const bytes = await r0.arrayBuffer()
   return WebAssembly.instantiate(bytes, importObject)
