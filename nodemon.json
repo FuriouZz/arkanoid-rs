@@ -1,0 +1,12 @@
+{
+  "verbose": false,
+  "watch": [
+    "src",
+    "js"
+  ],
+  "events": {
+    "start": "cargo build --target wasm32-unknown-unknown",
+    "restart": "cargo build --target wasm32-unknown-unknown"
+  },
+  "ext": "html,js,rs"
+}

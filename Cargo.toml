@@ -1,0 +1,5 @@
+[package]
+name = "arkanoid-rust"
+version = "0.1.0"
+authors = ["Christophe MASSOLIN <christophe.massolin@gmail.com>"]
+edition = "2018"
