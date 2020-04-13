@@ -1,4 +1,5 @@
-function decode_utf8(bytes) {
+// https://gist.github.com/pascaldekloe/62546103a1576803dade9269ccf76330
+export function decode_utf8(bytes) {
   var i = 0, s = '';
   while (i < bytes.length) {
     var c = bytes[i++];
@@ -27,59 +28,8 @@ function decode_utf8(bytes) {
   return s;
 }
 
-
-async function load_wasm(path, interface) {
+export async function load_wasm(path: string, importObject: Record<string, Record<string, WebAssembly.ImportValue>>) {
   const r0 = await fetch(path)
   const bytes = await r0.arrayBuffer()
-  return WebAssembly.instantiate(bytes, interface)
-}
-
-async function main() {
-  const wasm = await WasmInterface.load('./target/wasm32-unknown-unknown/debug/arkanoid-rust.wasm')
-  wasm.exports.main()
-}
-
-window.addEventListener('DOMContentLoaded', main)
-
-class WasmInterface {
-
-  wasm
-
-  /**
-   * @type {WebAssembly.Memory}
-   */
-  get memory() {
-    return this.wasm.instance.exports.memory
-  }
-
-  /**
-   * @type {Record<string, WebAssembly.ExportValue>}
-   */
-  get exports() {
-    return this.wasm.instance.exports
-  }
-
-  createInterface() {
-    return {
-      env: {
-        console_log: this.console_log.bind(this),
-      }
-    }
-  }
-
-  console_log(ptr, len) {
-    const bytes = new Uint8Array(this.memory.buffer, ptr, len)
-    console.log(decode_utf8(bytes))
-  }
-
-  /**
-   * @param {string} path
-   */
-  static async load(path) {
-    const wasm = new WasmInterface()
-    const wasm_module = await load_wasm(path, wasm.createInterface())
-    wasm.wasm = wasm_module
-    return wasm
-  }
-
+  return WebAssembly.instantiate(bytes, importObject)
 }
