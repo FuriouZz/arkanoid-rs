@@ -1,12 +1,68 @@
 import { load_wasm, bind } from "./utils.js"
 import * as Functions from "./fns.js"
 
+/**
+ * @class
+ * @module wasm
+ */
 export class WASM {
 
-  renderer
+  /**
+   * @type {CanvasRenderingContext2D}
+   */
+  ctx
+
+  /**
+   * @type {WebAssembly.WebAssemblyInstantiatedSource}
+   */
   wasm
-  get memory() { return this.wasm.instance.exports.memory }
+
+  /**
+   * @type {Record<string, WebAssembly.ExportValue>}
+   */
   get exports() { return this.wasm.instance.exports }
+
+  /**
+   * @type {WebAssembly.Memory}
+   */
+  get memory() { return this.wasm.instance.exports.memory }
+
+  constructor() {
+    this.onResize = this.onResize.bind(this)
+    this.onUpdate = this.onUpdate.bind(this)
+  }
+
+  init() {
+    // Init Canvas2D
+    const $canvas = document.createElement('canvas')
+    document.body.appendChild($canvas)
+    $canvas.style.cssText = `position: fixed; top: 0; left: 0;`
+    this.ctx = $canvas.getContext('2d')
+
+    // Initialize WASM
+    this.exports.main()
+
+    // Listen resize event
+    window.addEventListener("resize", this.onResize)
+    this.onResize()
+
+    // Execute RAF
+    this.onUpdate()
+  }
+
+  onResize() {
+    this.ctx.canvas.width = window.innerWidth
+    this.ctx.canvas.height = window.innerHeight
+    this.ctx.canvas.style.width = `${window.innerWidth}px`
+    this.ctx.canvas.style.height = `${window.innerHeight}px`
+
+    this.exports.resize(Math.floor(this.ctx.canvas.width), Math.floor(this.ctx.canvas.height))
+  }
+
+  onUpdate() {
+    this.exports.update()
+    window.requestAnimationFrame(this.onUpdate)
+  }
 
   /**
    * @param {string} path
@@ -16,6 +72,7 @@ export class WASM {
     const env = bind({...Functions}, i)
     const wasm = await load_wasm(path, { env })
     i.wasm = wasm
+    i.init()
     return i
   }
 
