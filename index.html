@@ -6,6 +6,9 @@
   <title>Document</title>
 </head>
 <body>
-  <script src="scripts/main.js" type="module"></script>
+  <script type="module">
+    import { WASM } from "./scripts/wasm.js"
+    WASM.load('target/wasm32-unknown-unknown/debug/examples/arkanoid.wasm')
+  </script>
 </body>
 </html>

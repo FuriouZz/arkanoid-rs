@@ -29,7 +29,7 @@ export class WASM {
 
   constructor() {
     this.onResize = this.onResize.bind(this)
-    this.onUpdate = this.onUpdate.bind(this)
+    this.onFrame = this.onFrame.bind(this)
   }
 
   init() {
@@ -38,6 +38,10 @@ export class WASM {
     document.body.appendChild($canvas)
     $canvas.style.cssText = `position: fixed; top: 0; left: 0;`
     this.ctx = $canvas.getContext('2d')
+    $canvas.width = window.innerWidth
+    $canvas.height = window.innerHeight
+    $canvas.style.width = `${window.innerWidth}px`
+    $canvas.style.height = `${window.innerHeight}px`
 
     // Initialize WASM
     this.exports.main()
@@ -47,7 +51,7 @@ export class WASM {
     this.onResize()
 
     // Execute RAF
-    this.onUpdate()
+    this.onFrame()
   }
 
   onResize() {
@@ -55,13 +59,12 @@ export class WASM {
     this.ctx.canvas.height = window.innerHeight
     this.ctx.canvas.style.width = `${window.innerWidth}px`
     this.ctx.canvas.style.height = `${window.innerHeight}px`
-
     this.exports.resize(Math.floor(this.ctx.canvas.width), Math.floor(this.ctx.canvas.height))
   }
 
-  onUpdate() {
-    this.exports.update()
-    window.requestAnimationFrame(this.onUpdate)
+  onFrame() {
+    this.exports.frame()
+    window.requestAnimationFrame(this.onFrame)
   }
 
   /**

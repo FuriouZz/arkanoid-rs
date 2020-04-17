@@ -1,22 +1,28 @@
 use super::canvas;
 use super::console;
 use std::sync::Once;
+use crate::event::EventHandler;
 
 static mut APP: Option<Application> = None;
 static START_APP: Once = Once::new();
 
-pub struct Application {}
+pub struct Application {
+  stage: Option<Box<dyn EventHandler>>
+}
 
 impl Application {
 
-  pub unsafe fn init() -> &'static mut Self {
-    Application::get()
+  pub unsafe fn init(handler: Box<dyn EventHandler>) -> &'static mut Self {
+    let app = Application::get();
+    app.stage = Some(handler);
+    app
   }
 
   unsafe fn get() -> &'static mut Self {
     START_APP.call_once(|| {
-      let app = Self {};
-      APP = Some(app);
+      APP = Some(Self {
+        stage: None
+      });
       console::log("Application initialized 🥰");
     });
 
@@ -24,25 +30,35 @@ impl Application {
   }
 
   fn resize(&self, width: i32, height: i32) {
-    console::log(format!("Resolution {}x{}", width, height).as_str());
+    let app = unsafe { Application::get() };
+
+    match app.stage.as_mut() {
+      Some(stage) => stage.resize(width, height),
+      None => {}
+    };
   }
 
-  fn update(&self) {
-    // console::log("update");
+  fn frame(&self) {
+    let app = unsafe { Application::get() };
+
+    match app.stage.as_mut() {
+      Some(stage) => stage.frame(),
+      None => {}
+    };
   }
 
 }
 
 #[no_mangle]
-pub extern "C" fn resize(width: i32, height: i32) {
+extern "C" fn resize(width: i32, height: i32) {
   unsafe {
     Application::get().resize(width, height);
   }
 }
 
 #[no_mangle]
-pub extern "C" fn update() {
+extern "C" fn frame() {
   unsafe {
-    Application::get().update();
+    Application::get().frame();
   }
 }

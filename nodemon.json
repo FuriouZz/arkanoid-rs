@@ -5,8 +5,8 @@
     "js"
   ],
   "events": {
-    "start": "cargo build --target wasm32-unknown-unknown",
-    "restart": "cargo build --target wasm32-unknown-unknown"
+    "start": "cargo build --target wasm32-unknown-unknown --example arkanoid",
+    "restart": "cargo build --target wasm32-unknown-unknown --example arkanoid"
   },
   "ext": "html,js,rs"
 }
