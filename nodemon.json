@@ -2,7 +2,8 @@
   "verbose": false,
   "watch": [
     "src",
-    "js"
+    "js",
+    "examples"
   ],
   "events": {
     "start": "cargo build --target wasm32-unknown-unknown --example arkanoid",

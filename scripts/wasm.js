@@ -1,5 +1,6 @@
 import { load_wasm, bind } from "./utils.js"
 import * as Functions from "./fns.js"
+import { Events } from "./events.js"
 
 /**
  * @class
@@ -30,6 +31,7 @@ export class WASM {
   constructor() {
     this.onResize = this.onResize.bind(this)
     this.onFrame = this.onFrame.bind(this)
+    this.onPointer = this.onPointer.bind(this)
   }
 
   init() {
@@ -43,14 +45,16 @@ export class WASM {
     $canvas.style.width = `${window.innerWidth}px`
     $canvas.style.height = `${window.innerHeight}px`
 
-    // Initialize WASM
+    // Initialize
     this.exports.main()
 
     // Listen resize event
     window.addEventListener("resize", this.onResize)
-    this.onResize()
+    window.addEventListener("pointerdown", this.onPointer)
+    window.addEventListener("pointerup", this.onPointer)
+    window.addEventListener("pointermove", this.onPointer)
 
-    // Execute RAF
+    this.onResize()
     this.onFrame()
   }
 
@@ -65,6 +69,30 @@ export class WASM {
   onFrame() {
     this.exports.frame()
     window.requestAnimationFrame(this.onFrame)
+  }
+
+  /**
+   *
+   * @param {PointerEvent} e
+   */
+  onPointer(e) {
+    switch (e.type) {
+      case "pointerup":
+        {
+          this.exports.pointer(Events.POINTER_UP, Math.floor(e.clientX), Math.floor(e.clientY))
+          break
+        }
+      case "pointerdown":
+        {
+          this.exports.pointer(Events.POINTER_DOWN, Math.floor(e.clientX), Math.floor(e.clientY))
+          break
+        }
+      case "pointermove":
+        {
+          this.exports.pointer(Events.POINTER_MOVE, Math.floor(e.clientX), Math.floor(e.clientY))
+          break
+        }
+    }
   }
 
   /**

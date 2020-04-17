@@ -1,7 +1,7 @@
 use super::canvas;
 use super::console;
 use std::sync::Once;
-use crate::event::EventHandler;
+use crate::event::{EventHandler, EventType, Event};
 
 static mut APP: Option<Application> = None;
 static START_APP: Once = Once::new();
@@ -18,47 +18,63 @@ impl Application {
     app
   }
 
-  unsafe fn get() -> &'static mut Self {
+  fn get() -> &'static mut Self {
     START_APP.call_once(|| {
-      APP = Some(Self {
-        stage: None
-      });
-      console::log("Application initialized 🥰");
+      unsafe {
+        APP = Some(Self {
+          stage: None
+        });
+        console::log("Application initialized 🥰");
+      }
     });
 
-    APP.as_mut().expect("Application is not initialized.")
+    unsafe {
+      APP.as_mut().expect("Application is not initialized.")
+    }
   }
 
-  fn resize(&self, width: i32, height: i32) {
-    let app = unsafe { Application::get() };
-
-    match app.stage.as_mut() {
-      Some(stage) => stage.resize(width, height),
-      None => {}
-    };
+  fn get_stage(&mut self) -> &mut Box<dyn EventHandler> {
+    self.stage.as_mut().expect("No stage found")
   }
 
-  fn frame(&self) {
-    let app = unsafe { Application::get() };
+  fn resize(&mut self, width: i32, height: i32) {
+    let stage = Application::get().get_stage();
+    stage.resize(width, height);
+  }
 
-    match app.stage.as_mut() {
-      Some(stage) => stage.frame(),
-      None => {}
-    };
+  fn frame(&mut self) {
+    let stage = Application::get().get_stage();
+    stage.frame();
+  }
+
+  fn event(&mut self, e: Event) {
+    let stage = Application::get().get_stage();
+
+    match e.event {
+      EventType::POINTER_DOWN => stage.pointer_down(e.values[0], e.values[1]),
+      EventType::POINTER_UP => stage.pointer_up(e.values[0], e.values[1]),
+      EventType::POINTER_MOVE => stage.pointer_move(e.values[0], e.values[1]),
+      _ => {}
+    }
   }
 
 }
 
 #[no_mangle]
 extern "C" fn resize(width: i32, height: i32) {
-  unsafe {
-    Application::get().resize(width, height);
-  }
+  Application::get().resize(width, height);
 }
 
 #[no_mangle]
 extern "C" fn frame() {
-  unsafe {
-    Application::get().frame();
-  }
+  Application::get().frame();
+}
+
+#[no_mangle]
+extern "C" fn pointer(event: EventType, x: i32, y: i32) {
+  let e = Event {
+    event,
+    values: [x,y,0,0],
+  };
+  Application::get().event(e);
 }

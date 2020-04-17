@@ -15,6 +15,10 @@ impl event::EventHandler for Stage {
     fn resize(&mut self, width: i32, height: i32) {
         console::log(format!("Resolution {}x{} from Stage", width, height).as_str())
     }
+
+    fn pointer_move(&mut self, x: i32, y: i32) {
+        console::log(format!("{}x{}", x, y).as_str());
+    }
 }
 
 pub fn main() {
