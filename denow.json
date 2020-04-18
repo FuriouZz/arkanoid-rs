@@ -1,0 +1,19 @@
+{
+  "watch": [
+    "src",
+    "public",
+    "examples"
+  ],
+  "ext": "html,ts,rs",
+  "execute": {
+    "*.ts": [
+      ["deno", "--allow-read", "--allow-write", "tasks/compile.ts"]
+    ],
+    "*.rs": [
+      ["cargo", "build", "--target", "wasm32-unknown-unknown", "--example", "arkanoid"],
+      ["cp", "target/wasm32-unknown-unknown/debug/examples/arkanoid.wasm", "public/arkanoid.wasm"]
+    ]
+  },
+  "fullscreen": false,
+  "interval": 500
+}

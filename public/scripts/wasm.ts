@@ -1,38 +1,29 @@
-import { load_wasm, bind } from "./utils.js"
-import * as Canvas from "./canvas.js"
-import * as Sys from "./sys.js"
-import { Events } from "./events.js"
+import { load_wasm, bind } from "./utils.ts"
+import * as Canvas from "./canvas.ts"
+import * as Sys from "./sys.ts"
+import { Events } from "./events.ts"
 
-/**
- * @class
- * @module wasm
- */
+interface WASMExports {
+  main(): void
+  resize(width: number, height: number): void
+  frame(): void
+  pointer(event: Events, x: number, y: number): void
+}
+
 export class WASM {
 
-  /**
-   * @type {CanvasRenderingContext2D}
-   */
-  ctx
+  ctx!: CanvasRenderingContext2D
+  wasm!: WebAssembly.WebAssemblyInstantiatedSource
 
-  /**
-   * @type {WebAssembly.WebAssemblyInstantiatedSource}
-   */
-  wasm
+  get exports() {
+    return this.wasm.instance.exports as unknown as WASMExports
+  }
 
-  /**
-   * @type {Record<string, WebAssembly.ExportValue>}
-   */
-  get exports() { return this.wasm.instance.exports }
+  get memory() {
+    return this.wasm.instance.exports.memory as WebAssembly.Memory
+  }
 
-  /**
-   * @type {WebAssembly.Memory}
-   */
-  get memory() { return this.wasm.instance.exports.memory }
-
-  /**
-   * @type {CanvasGradient[]}
-   */
-  gradients = []
+  gradients: (CanvasGradient|null)[] = []
 
   constructor() {
     this.onResize = this.onResize.bind(this)
@@ -45,7 +36,7 @@ export class WASM {
     const $canvas = document.createElement('canvas')
     document.body.appendChild($canvas)
     $canvas.style.cssText = `position: fixed; top: 0; left: 0;`
-    this.ctx = $canvas.getContext('2d')
+    this.ctx = $canvas.getContext('2d') as CanvasRenderingContext2D
     $canvas.width = window.innerWidth
     $canvas.height = window.innerHeight
     $canvas.style.width = `${window.innerWidth}px`
@@ -76,11 +67,7 @@ export class WASM {
     window.requestAnimationFrame(this.onFrame)
   }
 
-  /**
-   *
-   * @param {PointerEvent} e
-   */
-  onPointer(e) {
+  onPointer(e: PointerEvent) {
     switch (e.type) {
       case "pointerup":
         {
@@ -100,10 +87,7 @@ export class WASM {
     }
   }
 
-  /**
-   * @param {string} path
-   */
-  static async load(path) {
+  static async load(path: string) {
     const i = new WASM()
     const env = bind({
       ...Sys,

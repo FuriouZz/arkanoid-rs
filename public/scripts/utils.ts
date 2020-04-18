@@ -1,5 +1,5 @@
 // https://gist.github.com/pascaldekloe/62546103a1576803dade9269ccf76330
-export function decode_utf8(bytes) {
+export function decode_utf8(bytes: Uint8Array) {
   var i = 0, s = '';
   while (i < bytes.length) {
     var c = bytes[i++];
@@ -28,18 +28,13 @@ export function decode_utf8(bytes) {
   return s;
 }
 
-/**
- *
- * @param {string} path
- * @param {Record<string, Record<string, WebAssembly.ImportValue>>} importObject
- */
-export async function load_wasm(path, importObject) {
+export async function load_wasm(path: string, importObject: Record<string, Record<string, WebAssembly.ImportValue>>) {
   const r0 = await fetch(path)
   const bytes = await r0.arrayBuffer()
   return WebAssembly.instantiate(bytes, importObject)
 }
 
-export function bind(obj, thisArg) {
+export function bind(obj: any, thisArg: any) {
   Object.entries(obj).forEach(([key, value]) => {
     if (typeof value === "function") obj[key] = value.bind(thisArg)
   })
