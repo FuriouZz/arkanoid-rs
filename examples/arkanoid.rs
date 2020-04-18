@@ -1,5 +1,6 @@
 use fine::{
-    event, start,
+    start,
+    event::{KeyCode, EventHandler},
     wasm::{canvas, console},
     wasm::canvas::Gradient,
 };
@@ -27,7 +28,7 @@ impl Stage {
 
 }
 
-impl event::EventHandler for Stage {
+impl EventHandler for Stage {
 
     fn init(&mut self) {
         self.create_gradient()
@@ -48,6 +49,10 @@ impl event::EventHandler for Stage {
 
     fn pointer_move(&mut self, x: i32, _y: i32) {
         self.x = x as f64;
+    }
+
+    fn key_up(&mut self, keycode: KeyCode) {
+        console::log(format!("{:?}", keycode).as_str());
     }
 }
 

@@ -1,13 +1,14 @@
 import { load_wasm, bind } from "./utils.ts"
 import * as Canvas from "./canvas.ts"
 import * as Sys from "./sys.ts"
-import { Events } from "./events.ts"
+import { EventType } from "./events.ts"
 
 interface WASMExports {
   main(): void
   resize(width: number, height: number): void
   frame(): void
-  pointer(event: Events, x: number, y: number): void
+  pointer(event: EventType, x: number, y: number): void
+  keyboard(event: EventType, keycode: number): void
 }
 
 export class WASM {
@@ -29,6 +30,7 @@ export class WASM {
     this.onResize = this.onResize.bind(this)
     this.onFrame = this.onFrame.bind(this)
     this.onPointer = this.onPointer.bind(this)
+    this.onKeyboard = this.onKeyboard.bind(this)
   }
 
   init() {
@@ -50,6 +52,8 @@ export class WASM {
     window.addEventListener("pointerdown", this.onPointer)
     window.addEventListener("pointerup", this.onPointer)
     window.addEventListener("pointermove", this.onPointer)
+    window.addEventListener("keyup", this.onKeyboard)
+    window.addEventListener("keydown", this.onKeyboard)
     this.onResize()
     this.onFrame()
   }
@@ -71,17 +75,35 @@ export class WASM {
     switch (e.type) {
       case "pointerup":
         {
-          this.exports.pointer(Events.POINTER_UP, Math.floor(e.clientX), Math.floor(e.clientY))
+          this.exports.pointer(EventType.PointerUp, Math.floor(e.clientX), Math.floor(e.clientY))
           break
         }
       case "pointerdown":
         {
-          this.exports.pointer(Events.POINTER_DOWN, Math.floor(e.clientX), Math.floor(e.clientY))
+          this.exports.pointer(EventType.PointerDown, Math.floor(e.clientX), Math.floor(e.clientY))
           break
         }
       case "pointermove":
         {
-          this.exports.pointer(Events.POINTER_MOVE, Math.floor(e.clientX), Math.floor(e.clientY))
+          this.exports.pointer(EventType.PointerMove, Math.floor(e.clientX), Math.floor(e.clientY))
+          break
+        }
+    }
+  }
+
+  onKeyboard(e: KeyboardEvent) {
+    switch (e.type) {
+      case "keyup":
+        {
+          this.exports.keyboard(EventType.KeyUp, e.keyCode)
+          break
+        }
+      case "keydown":
+        {
+          if (!e.repeat) {
+            this.exports.keyboard(EventType.KeyDown, e.keyCode)
+          }
+          this.exports.keyboard(EventType.KeyPressed, e.keyCode)
           break
         }
     }

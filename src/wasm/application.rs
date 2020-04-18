@@ -1,6 +1,6 @@
 use super::console;
 use std::sync::Once;
-use crate::event::{EventHandler, EventType, Event};
+use crate::event::{EventHandler, EventType};
 
 static mut APP: Option<Application> = None;
 static START_APP: Once = Once::new();
@@ -51,12 +51,22 @@ impl Application {
     let stage = Application::get().get_stage();
 
     match e.event {
-      EventType::PointerDown => stage.pointer_down(e.values[0], e.values[1]),
       EventType::PointerUp => stage.pointer_up(e.values[0], e.values[1]),
+      EventType::PointerDown => stage.pointer_down(e.values[0], e.values[1]),
       EventType::PointerMove => stage.pointer_move(e.values[0], e.values[1]),
+      EventType::KeyUp => stage.key_up(e.keycode.into()),
+      EventType::KeyDown => stage.key_down(e.keycode.into()),
+      EventType::KeyPressed => stage.key_pressed(e.keycode.into()),
     }
   }
 
+}
+
+#[derive(Debug)]
+pub struct Event {
+    pub event: crate::event::EventType,
+    pub values: [i32; 4],
+    pub keycode: super::key::KeyCode,
 }
 
 #[no_mangle]
@@ -71,9 +81,17 @@ extern "C" fn frame() {
 
 #[no_mangle]
 extern "C" fn pointer(event: EventType, x: i32, y: i32) {
-  let e = Event {
-    event,
-    values: [x,y,0,0],
-  };
+  let mut e: Event = unsafe { std::mem::zeroed() };
+  e.event = event;
+  e.values[0] = x;
+  e.values[1] = y;
+  Application::get().event(e);
+}
+
+#[no_mangle]
+extern "C" fn keyboard(event: EventType, keycode: super::key::KeyCode) {
+  let mut e: Event = unsafe { std::mem::zeroed() };
+  e.event = event;
+  e.keycode = keycode;
   Application::get().event(e);
 }

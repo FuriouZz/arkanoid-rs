@@ -36,7 +36,6 @@ const [errors, emitted] = await Deno
 })
 
 if (errors) {
-  console.log(errors);
   for (const error of errors) {
     console.log(`Err: ${error.scriptResourceName} [${error.lineNumber}:${error.startColumn}]`)
     console.log(`${error.message}`)
