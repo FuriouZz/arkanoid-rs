@@ -1,5 +1,6 @@
 import { load_wasm, bind } from "./utils.js"
-import * as Functions from "./fns.js"
+import * as Canvas from "./canvas.js"
+import * as Sys from "./sys.js"
 import { Events } from "./events.js"
 
 /**
@@ -28,6 +29,11 @@ export class WASM {
    */
   get memory() { return this.wasm.instance.exports.memory }
 
+  /**
+   * @type {CanvasGradient[]}
+   */
+  gradients = []
+
   constructor() {
     this.onResize = this.onResize.bind(this)
     this.onFrame = this.onFrame.bind(this)
@@ -53,7 +59,6 @@ export class WASM {
     window.addEventListener("pointerdown", this.onPointer)
     window.addEventListener("pointerup", this.onPointer)
     window.addEventListener("pointermove", this.onPointer)
-
     this.onResize()
     this.onFrame()
   }
@@ -100,7 +105,10 @@ export class WASM {
    */
   static async load(path) {
     const i = new WASM()
-    const env = bind({...Functions}, i)
+    const env = bind({
+      ...Sys,
+      ...Canvas,
+    }, i)
     const wasm = await load_wasm(path, { env })
     i.wasm = wasm
     i.init()

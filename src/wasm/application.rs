@@ -1,4 +1,3 @@
-use super::canvas;
 use super::console;
 use std::sync::Once;
 use crate::event::{EventHandler, EventType, Event};
@@ -15,6 +14,7 @@ impl Application {
   pub unsafe fn init(handler: Box<dyn EventHandler>) -> &'static mut Self {
     let app = Application::get();
     app.stage = Some(handler);
+    app.get_stage().init();
     app
   }
 
@@ -51,10 +51,9 @@ impl Application {
     let stage = Application::get().get_stage();
 
     match e.event {
-      EventType::POINTER_DOWN => stage.pointer_down(e.values[0], e.values[1]),
-      EventType::POINTER_UP => stage.pointer_up(e.values[0], e.values[1]),
-      EventType::POINTER_MOVE => stage.pointer_move(e.values[0], e.values[1]),
-      _ => {}
+      EventType::PointerDown => stage.pointer_down(e.values[0], e.values[1]),
+      EventType::PointerUp => stage.pointer_up(e.values[0], e.values[1]),
+      EventType::PointerMove => stage.pointer_move(e.values[0], e.values[1]),
     }
   }
 
