@@ -1,4 +1,4 @@
-mod player;
 mod ball;
-pub use player::*;
+mod player;
 pub use ball::*;
+pub use player::*;

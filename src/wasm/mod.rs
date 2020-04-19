@@ -1,6 +1,5 @@
-pub mod application;
+mod application;
 pub mod canvas;
-pub mod sys;
+pub mod console;
 pub mod key;
-
-pub use sys::*;
+pub use application::Application;

@@ -2,11 +2,10 @@ mod entities;
 use entities::*;
 
 use fine::{
+    event::{EventHandler, KeyCode},
     start,
-    event::{KeyCode, EventHandler},
-    wasm::{canvas, console},
+    wasm::canvas,
 };
-
 
 struct Stage {
     width: f64,
@@ -20,7 +19,6 @@ struct Stage {
 impl Stage {}
 
 impl EventHandler for Stage {
-
     fn init(&mut self) {
         self.player = Some(Player::new());
         self.ball = Some(Ball::new());
@@ -50,7 +48,7 @@ impl EventHandler for Stage {
     fn resize(&mut self, width: i32, height: i32) {
         self.width = width as f64;
         self.height = height as f64;
-        console::log(format!("Resolution {}x{} from Stage", width, height).as_str());
+        fine::log!("Resolution {}x{} from Stage", width, height);
 
         if let Some(ref mut player) = self.player {
             player.position(self.width * 0.5, self.height - player.height);

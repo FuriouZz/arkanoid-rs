@@ -1,13 +1,14 @@
-use std::os::raw::c_char;
+use crate::ffi;
 use std::ffi::CString;
+use std::os::raw::c_char;
 
 #[no_mangle]
 extern "C" {
     fn canvas_clear();
     fn canvas_fill_rect(x: f64, y: f64, width: f64, height: f64);
-    fn canvas_fill_style(ptr: *mut c_char, len: usize);
+    fn canvas_fill_style(ptr: *const c_char, len: usize);
     fn canvas_stroke_rect(x: f64, y: f64, width: f64, height: f64);
-    fn canvas_stroke_style(ptr: *mut c_char, len: usize);
+    fn canvas_stroke_style(ptr: *const c_char, len: usize);
     fn canvas_translate(x: f64, y: f64);
     fn canvas_scale(x: f64, y: f64);
     fn canvas_rotate(angle: f64);
@@ -18,7 +19,16 @@ extern "C" {
     fn canvas_stroke();
     fn canvas_fill();
     fn canvas_fill_outside();
-    fn canvas_ellipse(x: f64, y: f64, radiusX: f64, radiusY: f64, rotation: f64, startAngle: f64, endAngle: f64, anticlockwise: bool);
+    fn canvas_ellipse(
+        x: f64,
+        y: f64,
+        radiusX: f64,
+        radiusY: f64,
+        rotation: f64,
+        startAngle: f64,
+        endAngle: f64,
+        anticlockwise: bool,
+    );
     fn canvas_circle(x: f64, y: f64, radius: f64);
     fn canvas_global_alpha(alpha: f64);
     fn canvas_move_to(x: f64, y: f64);
@@ -39,37 +49,57 @@ extern "C" {
 }
 
 pub fn clear() {
-  unsafe { canvas_clear() }
+    unsafe { canvas_clear() }
 }
 
 pub fn fill_rect(x: f64, y: f64, width: f64, height: f64) {
-  unsafe { canvas_fill_rect(x, y, width, height) }
+    unsafe { canvas_fill_rect(x, y, width, height) }
 }
 
-pub fn fill_style(s: &str) {
-  let cs = CString::new(s).expect("CString::new failed");
-  unsafe { canvas_fill_style(cs.into_raw(), s.len()) }
+pub fn fill_style(s: &'static str) {
+    let cs = CString::new(s).expect("CString::new failed");
+    unsafe { canvas_fill_style(cs.into_raw(), s.len()) }
+}
+
+pub fn fill_style_static(s: &'static str) {
+    let (ptr, len) = ffi::get_static(s);
+    unsafe { canvas_fill_style(ptr, len) }
+}
+
+pub fn fill_style_owned(s: String) {
+    let (ptr, len) = ffi::get_owned(s);
+    unsafe { canvas_fill_style(ptr, len) }
 }
 
 pub fn stroke_rect(x: f64, y: f64, width: f64, height: f64) {
-  unsafe { canvas_stroke_rect(x, y, width, height) }
+    unsafe { canvas_stroke_rect(x, y, width, height) }
+}
+
+pub fn stroke_style_static(s: &'static str) {
+    let (ptr, len) = ffi::get_static(s);
+    unsafe { canvas_stroke_style(ptr, len) }
+}
+
+pub fn stroke_style_owned(s: String) {
+    let (ptr, len) = ffi::get_owned(s);
+    unsafe { canvas_stroke_style(ptr, len) }
 }
 
 pub fn stroke_style(s: &str) {
-  let cs = CString::new(s).expect("CString::new failed");
-  unsafe { canvas_stroke_style(cs.into_raw(), s.len()) }
+    let cs = CString::new(s).expect("CString::new failed");
+    unsafe { canvas_stroke_style(cs.into_raw(), s.len()) }
 }
 
 pub fn translate(x: f64, y: f64) {
-  unsafe { canvas_translate(x, y) }
+    unsafe { canvas_translate(x, y) }
 }
 
 pub fn scale(x: f64, y: f64) {
-  unsafe { canvas_scale(x, y) }
+    unsafe { canvas_scale(x, y) }
 }
 
 pub fn rotate(angle: f64) {
-  unsafe { canvas_rotate(angle) }
+    unsafe { canvas_rotate(angle) }
 }
 
 pub fn restore() {
@@ -81,7 +111,7 @@ pub fn save() {
 }
 
 pub fn set_transform(a: f64, b: f64, c: f64, d: f64, e: f64, f: f64) {
-    unsafe { canvas_set_transform(a,b,c,d,e,f) }
+    unsafe { canvas_set_transform(a, b, c, d, e, f) }
 }
 
 pub fn reset_transform() {
@@ -100,8 +130,28 @@ pub fn fill_outside() {
     unsafe { canvas_fill_outside() }
 }
 
-pub fn ellipse(x: f64, y: f64, radius_x: f64, radius_y: f64, rotation: f64, start_angle: f64, end_angle: f64, anticlockwise: bool) {
-    unsafe { canvas_ellipse(x, y, radius_x, radius_y, rotation, start_angle, end_angle, anticlockwise) }
+pub fn ellipse(
+    x: f64,
+    y: f64,
+    radius_x: f64,
+    radius_y: f64,
+    rotation: f64,
+    start_angle: f64,
+    end_angle: f64,
+    anticlockwise: bool,
+) {
+    unsafe {
+        canvas_ellipse(
+            x,
+            y,
+            radius_x,
+            radius_y,
+            rotation,
+            start_angle,
+            end_angle,
+            anticlockwise,
+        )
+    }
 }
 
 pub fn circle(x: f64, y: f64, radius: f64) {
@@ -147,7 +197,6 @@ pub fn is_point_inside_path(x: f64, y: f64) {
 pub fn is_point_outside_path(x: f64, y: f64) {
     unsafe { canvas_is_point_outside_path(x, y) }
 }
-
 
 pub struct Gradient(usize);
 
