@@ -11,6 +11,8 @@ use fine::{
 struct Stage {
     width: f64,
     height: f64,
+    key_left: bool,
+    key_right: bool,
     player: Option<Player>,
     ball: Option<Ball>,
 }
@@ -28,7 +30,14 @@ impl EventHandler for Stage {
         canvas::clear();
 
         if let Some(ref mut player) = self.player {
-            player.update();
+            if self.key_left {
+                player.x -= 20.;
+            }
+            if self.key_right {
+                player.x += 20.;
+            }
+
+            player.update(self.width, self.height);
             player.draw();
         }
 
@@ -52,13 +61,19 @@ impl EventHandler for Stage {
         }
     }
 
+    fn key_up(&mut self, keycode: KeyCode) {
+        match keycode {
+            KeyCode::Left => self.key_left = false,
+            KeyCode::Right => self.key_right = false,
+            _ => {}
+        }
+    }
+
     fn key_pressed(&mut self, keycode: KeyCode) {
-        if let Some(ref mut player) = self.player {
-            match keycode {
-                KeyCode::Left => player.x -= 20.,
-                KeyCode::Right => player.x += 20.,
-                _ => {}
-            }
+        match keycode {
+            KeyCode::Left => self.key_left = true,
+            KeyCode::Right => self.key_right = true,
+            _ => {}
         }
     }
 }
@@ -67,6 +82,8 @@ pub fn main() {
     start(Stage {
         width: 0.,
         height: 0.,
+        key_left: false,
+        key_right: false,
         player: None,
         ball: None,
     });

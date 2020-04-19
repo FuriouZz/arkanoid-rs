@@ -29,9 +29,22 @@ impl Player {
     self.y = y;
   }
 
-  pub fn update(&mut self) {
-    self._x += (self.x - self._x) * 0.15;
-    self._y += (self.y - self._y) * 0.15;
+  pub fn update(&mut self, width: f64, height: f64) {
+    if self.x - self.width * 0.5 < 0. {
+      self.x = self.width * 0.5;
+    }
+    if self.y < self.height * 0.5 {
+      self.y = self.height * 0.5;
+    }
+    if self.x + self.width * 0.5 > width {
+      self.x = width - self.width * 0.5;
+    }
+    if self.y + self.height * 0.5 > height {
+      self.y = height - self.height * 0.5;
+    }
+
+    self._x += (self.x - self._x) * 0.125;
+    self._y += (self.y - self._y) * 0.125;
   }
 
   pub fn draw(&self) {
