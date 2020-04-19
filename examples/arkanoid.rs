@@ -1,105 +1,84 @@
-mod entities;
 mod common;
+mod entities;
+use common::Drawable;
 use entities::*;
-use common::{Drawable, Debuggable};
+use std::collections::HashSet;
 
 use fine::{
     event::{EventHandler, KeyCode},
     start,
-    wasm::canvas, math::Rect,
+    wasm::canvas,
 };
 
-struct Stage {
-    width: f64,
-    height: f64,
-    key_left: bool,
-    key_right: bool,
-    player: Option<Player>,
-    ball: Option<Ball>,
+pub struct Stage {
+    state: GameState,
+    drawables: Vec<Box<dyn Drawable>>,
 }
 
 impl Stage {
-    fn debug(&self, rect: &Rect) {
-        canvas::fill_style_static("rgba(255, 0, 0, 0.25)");
-        canvas::stroke_style_static("rgba(255, 0, 0, 0.25)");
-        canvas::fill_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y);
-        canvas::stroke_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y);
+    fn new() -> Self {
+        let mut drawables: Vec<Box<dyn Drawable>> = Vec::new();
+        drawables.push(Box::new(Player::new()));
+        drawables.push(Box::new(Ball::new()));
+        Self {
+            state: GameState::new(),
+            drawables,
+        }
+    }
+}
+
+pub struct GameState {
+    screen: (f64, f64),
+    pressed: HashSet<KeyCode>,
+    dt: f64,
+}
+
+impl GameState {
+    fn new() -> Self {
+        let pressed = HashSet::new();
+
+        let state = Self {
+            screen: (0., 0.),
+            pressed,
+            dt: 0.,
+        };
+
+        state
     }
 }
 
 impl EventHandler for Stage {
-    fn init(&mut self) {
-        let player = Player::new();
-        let ball = Ball::new();
+    fn frame(&mut self, dt: f64) {
+        self.state.dt = dt;
 
-        self.player = Some(player);
-        self.ball = Some(ball);
-    }
-
-    fn frame(&mut self) {
-        canvas::clear();
-
-        if let Some(ref mut player) = self.player {
-            if self.key_left {
-                player.x -= 20.;
-            }
-            if self.key_right {
-                player.x += 20.;
-            }
-
-            player.update(self.width, self.height);
-            player.draw();
-            let r = player.debug();
-            self.debug(&r);
+        for drawable in self.drawables.iter_mut() {
+            drawable.update(&self.state);
         }
 
-        if let Some(ref mut ball) = self.ball {
-            ball.update(self.width, self.height);
-            ball.draw();
-
-            let r = ball.debug();
-            self.debug(&r);
+        canvas::clear();
+        for drawable in self.drawables.iter_mut() {
+            drawable.draw();
         }
     }
 
     fn resize(&mut self, width: i32, height: i32) {
-        self.width = width as f64;
-        self.height = height as f64;
-        fine::log!("Resolution {}x{} from Stage", width, height);
+        self.state.screen.0 = width as f64;
+        self.state.screen.1 = height as f64;
 
-        if let Some(ref mut player) = self.player {
-            player.position(self.width * 0.5, self.height - player.height);
-        }
-
-        if let Some(ref mut ball) = self.ball {
-            ball.position(self.width * 0.5, self.height * 0.5);
+        for drawable in self.drawables.iter_mut() {
+            drawable.resize(&self.state);
         }
     }
 
     fn key_up(&mut self, keycode: KeyCode) {
-        match keycode {
-            KeyCode::Left => self.key_left = false,
-            KeyCode::Right => self.key_right = false,
-            _ => {}
-        }
+        self.state.pressed.remove(&keycode);
     }
 
     fn key_pressed(&mut self, keycode: KeyCode) {
-        match keycode {
-            KeyCode::Left => self.key_left = true,
-            KeyCode::Right => self.key_right = true,
-            _ => {}
-        }
+        self.state.pressed.insert(keycode);
     }
 }
 
-pub fn main() {
-    start(Stage {
-        width: 0.,
-        height: 0.,
-        key_left: false,
-        key_right: false,
-        player: None,
-        ball: None,
-    });
+fn main() {
+    start(|| Stage::new());
 }

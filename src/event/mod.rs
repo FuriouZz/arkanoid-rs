@@ -2,8 +2,7 @@ pub mod key;
 pub use key::KeyCode;
 
 pub trait EventHandler {
-    fn init(&mut self);
-    fn frame(&mut self);
+    fn frame(&mut self, dt: f64) {}
     fn resize(&mut self, _width: i32, _height: i32) {}
     fn pointer_up(&mut self, _x: i32, _y: i32) {}
     fn pointer_down(&mut self, _x: i32, _y: i32) {}

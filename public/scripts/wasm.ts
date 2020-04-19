@@ -6,7 +6,7 @@ import { EventType } from "./events.ts"
 interface WASMExports {
   main(): void
   resize(width: number, height: number): void
-  frame(): void
+  frame(dt: number): void
   pointer(event: EventType, x: number, y: number): void
   keyboard(event: EventType, keycode: number): void
 }
@@ -15,6 +15,7 @@ export class WASM {
 
   ctx!: CanvasRenderingContext2D
   wasm!: WebAssembly.WebAssemblyInstantiatedSource
+  time: number = 0
 
   get exports() {
     return this.wasm.instance.exports as unknown as WASMExports
@@ -67,7 +68,11 @@ export class WASM {
   }
 
   onFrame() {
-    this.exports.frame()
+    const time = performance.now()
+    const dt = time - this.time;
+    this.time = time
+
+    this.exports.frame(dt)
     window.requestAnimationFrame(this.onFrame)
   }
 

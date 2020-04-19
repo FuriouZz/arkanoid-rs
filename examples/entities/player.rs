@@ -1,74 +1,72 @@
-use crate::common::{Debuggable, Drawable};
-use fine::{
-    math::{Rect, Vec2},
-    wasm::canvas,
-};
+use crate::{common::Drawable, GameState};
+use fine::{event::KeyCode, math::Vec2, wasm::canvas};
 
 pub struct Player {
-    pub x: f64,
-    pub y: f64,
-    pub width: f64,
-    pub height: f64,
-    _x: f64,
-    _y: f64,
+    pub position: Vec2,
+    pub size: Vec2,
+    _position: Vec2,
 }
 
 impl Player {
     pub fn new() -> Self {
+        let position = Vec2::new();
+        let _position = Vec2::new();
+        let mut size = Vec2::new();
+        size.x = 150.;
+        size.y = 25.;
+
         Self {
-            x: 0.,
-            y: 0.,
-            _x: 0.,
-            _y: 0.,
-            width: 150.,
-            height: 15.,
+            _position,
+            position,
+            size,
         }
     }
 
-    pub fn position(&mut self, x: f64, y: f64) {
-        self._x = x;
-        self.x = x;
-        self._y = y;
-        self.y = y;
-    }
-
-    pub fn update(&mut self, width: f64, height: f64) {
-        if self.x - self.width * 0.5 < 0. {
-            self.x = self.width * 0.5;
-        }
-        if self.y < self.height * 0.5 {
-            self.y = self.height * 0.5;
-        }
-        if self.x + self.width * 0.5 > width {
-            self.x = width - self.width * 0.5;
-        }
-        if self.y + self.height * 0.5 > height {
-            self.y = height - self.height * 0.5;
-        }
-
-        self._x += (self.x - self._x) * 0.125;
-        self._y += (self.y - self._y) * 0.125;
+    pub fn reset(&mut self, x: f64, y: f64) {
+        self._position.x = x;
+        self.position.x = x;
+        self._position.y = y;
+        self.position.y = y;
     }
 }
 
 impl Drawable for Player {
+    fn resize(&mut self, s: &GameState) {
+        self.reset(s.screen.0 * 0.5, s.screen.1 - self.size.y)
+    }
+
+    fn update(&mut self, s: &GameState) {
+        if s.pressed.contains(&KeyCode::Left) {
+            self.position.x -= 1. * s.dt;
+        }
+        if s.pressed.contains(&KeyCode::Right) {
+            self.position.x += 1. * s.dt;
+        }
+
+        if self.position.x - self.size.x * 0.5 < 0. {
+            self.position.x = self.size.x * 0.5;
+        }
+        if self.position.y < self.size.y * 0.5 {
+            self.position.y = self.size.y * 0.5;
+        }
+        if self.position.x + self.size.x * 0.5 > s.screen.0 {
+            self.position.x = s.screen.0 - self.size.x * 0.5;
+        }
+        if self.position.y + self.size.y * 0.5 > s.screen.1 {
+            self.position.y = s.screen.1 - self.size.y * 0.5;
+        }
+
+        self._position.x += (self.position.x - self._position.x) * 0.125;
+        self._position.y += (self.position.y - self._position.y) * 0.125;
+    }
+
     fn draw(&self) {
         canvas::fill_style_static("blue");
-        canvas::fill_rect(self._x - self.width * 0.5, self._y, self.width, self.height);
-    }
-}
-
-impl Debuggable for Player {
-    fn debug(&self) -> Rect {
-        Rect {
-            position: Vec2 {
-                x: self._x - self.width * 0.5,
-                y: self._y,
-            },
-            size: Vec2 {
-                x: self.width,
-                y: self.height,
-            },
-        }
+        canvas::fill_rect(
+            self._position.x - self.size.x * 0.5,
+            self._position.y,
+            self.size.x,
+            self.size.y,
+        );
     }
 }

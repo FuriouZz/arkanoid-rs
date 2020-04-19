@@ -1,9 +1,7 @@
-use fine::math::Rect;
+use crate::GameState;
 
 pub trait Drawable {
+  fn resize(&mut self, _state: &GameState) {}
+  fn update(&mut self, _state: &GameState) {}
   fn draw(&self);
-}
-
-pub trait Debuggable {
-  fn debug(&self) -> Rect;
 }

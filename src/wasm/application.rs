@@ -10,10 +10,14 @@ pub struct Application {
 }
 
 impl Application {
-    pub unsafe fn init(handler: Box<dyn EventHandler>) -> &'static mut Self {
+    pub unsafe fn init<T, F>(handler: F) -> &'static mut Self
+    where
+        T: EventHandler + 'static,
+        F: FnOnce() -> T,
+    {
         let app = Application::get();
-        app.stage = Some(handler);
-        app.get_stage().init();
+        let stage = Box::new(handler());
+        app.stage = Some(stage);
         app
     }
 
@@ -35,9 +39,9 @@ impl Application {
         stage.resize(width, height);
     }
 
-    fn frame(&mut self) {
+    fn frame(&mut self, dt: f64) {
         let stage = Application::get().get_stage();
-        stage.frame();
+        stage.frame(dt);
     }
 
     fn event(&mut self, e: Event) {
@@ -67,8 +71,8 @@ extern "C" fn resize(width: i32, height: i32) {
 }
 
 #[no_mangle]
-extern "C" fn frame() {
-    Application::get().frame();
+extern "C" fn frame(dt: f64) {
+    Application::get().frame(dt);
 }
 
 #[no_mangle]

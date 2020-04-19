@@ -5,12 +5,13 @@ pub mod math;
 
 use std::panic;
 
-pub fn start<T>(handler: T)
+pub fn start<F, T>(handler: F)
 where
     T: event::EventHandler + 'static,
+    F: FnOnce() -> T,
 {
     unsafe {
-        wasm::Application::init(Box::new(handler));
+        wasm::Application::init(handler);
     }
 
     {
