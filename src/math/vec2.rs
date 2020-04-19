@@ -29,7 +29,7 @@ impl Vec2 {
     pub fn distance(&self, v0: &Vec2) -> f64 {
         let x = self.x - v0.x;
         let y = self.y - v0.y;
-        f64::sqrt(x*x + y*y)
+        f64::sqrt(x * x + y * y)
     }
 }
 

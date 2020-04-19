@@ -1,5 +1,5 @@
-use super::Vec2;
 use super::Line;
+use super::Vec2;
 
 #[derive(Debug)]
 pub struct Rect {
@@ -32,35 +32,58 @@ impl Rect {
     }
 
     pub fn top_left(&self) -> Vec2 {
-        Vec2 { x: self.position.x, y: self.position.y }
+        Vec2 {
+            x: self.position.x,
+            y: self.position.y,
+        }
     }
 
     pub fn top_right(&self) -> Vec2 {
-        Vec2 { x: self.position.x + self.size.x, y: self.position.y }
+        Vec2 {
+            x: self.position.x + self.size.x,
+            y: self.position.y,
+        }
     }
 
     pub fn bottom_left(&self) -> Vec2 {
-        Vec2 { x: self.position.x, y: self.position.y + self.size.y }
+        Vec2 {
+            x: self.position.x,
+            y: self.position.y + self.size.y,
+        }
     }
 
     pub fn bottom_right(&self) -> Vec2 {
-        Vec2 { x: self.position.x + self.size.x, y: self.position.y + self.size.y }
+        Vec2 {
+            x: self.position.x + self.size.x,
+            y: self.position.y + self.size.y,
+        }
     }
 
     pub fn edge_top(&self) -> Line {
-        Line { v0: self.top_left(), v1: self.top_right() }
+        Line {
+            v0: self.top_left(),
+            v1: self.top_right(),
+        }
     }
 
     pub fn edge_bottom(&self) -> Line {
-        Line { v0: self.bottom_left(), v1: self.bottom_right() }
+        Line {
+            v0: self.bottom_left(),
+            v1: self.bottom_right(),
+        }
     }
 
     pub fn edge_left(&self) -> Line {
-        Line { v0: self.top_left(), v1: self.bottom_left() }
+        Line {
+            v0: self.top_left(),
+            v1: self.bottom_left(),
+        }
     }
 
     pub fn edge_right(&self) -> Line {
-        Line { v0: self.top_right(), v1: self.bottom_right() }
+        Line {
+            v0: self.top_right(),
+            v1: self.bottom_right(),
+        }
     }
-
 }
