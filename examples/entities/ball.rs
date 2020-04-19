@@ -1,4 +1,8 @@
-use fine::wasm::canvas;
+use crate::common::{Debuggable, Drawable};
+use fine::{
+    math::{Rect, Vec2},
+    wasm::canvas,
+};
 
 pub struct Ball {
     pub x: f64,
@@ -35,12 +39,29 @@ impl Ball {
         self.x += self.acc_x;
         self.y += self.acc_y;
     }
+}
 
-    pub fn draw(&self) {
+impl Drawable for Ball {
+    fn draw(&self) {
         canvas::fill_style_static("green");
         canvas::begin_path();
         canvas::circle(self.x, self.y, self.radius);
         canvas::close_path();
         canvas::fill();
+    }
+}
+
+impl Debuggable for Ball {
+    fn debug(&self) -> Rect {
+        Rect {
+            position: Vec2 {
+                x: self.x - self.radius,
+                y: self.y - self.radius,
+            },
+            size: Vec2 {
+                x: self.radius*2.,
+                y: self.radius*2.,
+            },
+        }
     }
 }

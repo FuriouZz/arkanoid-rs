@@ -1,4 +1,8 @@
-use fine::wasm::canvas;
+use crate::common::{Debuggable, Drawable};
+use fine::{
+    math::{Rect, Vec2},
+    wasm::canvas,
+};
 
 pub struct Player {
     pub x: f64,
@@ -45,9 +49,26 @@ impl Player {
         self._x += (self.x - self._x) * 0.125;
         self._y += (self.y - self._y) * 0.125;
     }
+}
 
-    pub fn draw(&self) {
-        canvas::fill_style_static("red");
+impl Drawable for Player {
+    fn draw(&self) {
+        canvas::fill_style_static("blue");
         canvas::fill_rect(self._x - self.width * 0.5, self._y, self.width, self.height);
+    }
+}
+
+impl Debuggable for Player {
+    fn debug(&self) -> Rect {
+        Rect {
+            position: Vec2 {
+                x: self._x - self.width * 0.5,
+                y: self._y,
+            },
+            size: Vec2 {
+                x: self.width,
+                y: self.height,
+            },
+        }
     }
 }

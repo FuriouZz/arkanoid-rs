@@ -1,10 +1,12 @@
 mod entities;
+mod common;
 use entities::*;
+use common::{Drawable, Debuggable};
 
 use fine::{
     event::{EventHandler, KeyCode},
     start,
-    wasm::canvas,
+    wasm::canvas, math::Rect,
 };
 
 struct Stage {
@@ -16,12 +18,22 @@ struct Stage {
     ball: Option<Ball>,
 }
 
-impl Stage {}
+impl Stage {
+    fn debug(&self, rect: &Rect) {
+        canvas::fill_style_static("rgba(255, 0, 0, 0.25)");
+        canvas::stroke_style_static("rgba(255, 0, 0, 0.25)");
+        canvas::fill_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y);
+        canvas::stroke_rect(rect.position.x, rect.position.y, rect.size.x, rect.size.y);
+    }
+}
 
 impl EventHandler for Stage {
     fn init(&mut self) {
-        self.player = Some(Player::new());
-        self.ball = Some(Ball::new());
+        let player = Player::new();
+        let ball = Ball::new();
+
+        self.player = Some(player);
+        self.ball = Some(ball);
     }
 
     fn frame(&mut self) {
@@ -37,11 +49,16 @@ impl EventHandler for Stage {
 
             player.update(self.width, self.height);
             player.draw();
+            let r = player.debug();
+            self.debug(&r);
         }
 
         if let Some(ref mut ball) = self.ball {
             ball.update(self.width, self.height);
             ball.draw();
+
+            let r = ball.debug();
+            self.debug(&r);
         }
     }
 
