@@ -1,6 +1,7 @@
 pub mod event;
 pub mod ffi;
 pub mod wasm;
+pub mod math;
 
 use std::panic;
 
