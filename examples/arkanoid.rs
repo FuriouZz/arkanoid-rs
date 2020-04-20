@@ -1,36 +1,35 @@
-mod common;
 mod entities;
-use common::Drawable;
 use entities::*;
 use std::collections::HashSet;
 
 use fine::{
     event::{EventHandler, KeyCode},
     start,
+    math::Rect,
     wasm::canvas,
 };
 
 pub struct Stage {
     state: GameState,
-    drawables: Vec<Box<dyn Drawable>>,
+    player: Player,
+    ball: Ball,
 }
 
 impl Stage {
     fn new() -> Self {
-        let mut drawables: Vec<Box<dyn Drawable>> = Vec::new();
-        drawables.push(Box::new(Player::new()));
-        drawables.push(Box::new(Ball::new()));
         Self {
             state: GameState::new(),
-            drawables,
+            player: Player::new(),
+            ball: Ball::new(),
         }
     }
 }
 
 pub struct GameState {
-    screen: (f64, f64),
+    screen: Rect,
     pressed: HashSet<KeyCode>,
     dt: f64,
+    time: f64,
 }
 
 impl GameState {
@@ -38,8 +37,9 @@ impl GameState {
         let pressed = HashSet::new();
 
         let state = Self {
-            screen: (0., 0.),
+            screen: Rect::new(),
             pressed,
+            time: 0.,
             dt: 0.,
         };
 
@@ -48,26 +48,29 @@ impl GameState {
 }
 
 impl EventHandler for Stage {
-    fn frame(&mut self, dt: f64) {
-        self.state.dt = dt;
+    fn frame(&mut self) {
+        let time = fine::wasm::now();
+        self.state.dt = time - self.state.time;
+        self.state.time = time;
 
-        for drawable in self.drawables.iter_mut() {
-            drawable.update(&self.state);
-        }
+        self.player.update(&self.state);
+        self.ball.update(&self.state);
 
         canvas::clear();
-        for drawable in self.drawables.iter_mut() {
-            drawable.draw();
-        }
+        self.player.draw();
+        self.ball.draw();
     }
 
     fn resize(&mut self, width: i32, height: i32) {
-        self.state.screen.0 = width as f64;
-        self.state.screen.1 = height as f64;
+        self.state.screen.size.x = width as f64;
+        self.state.screen.size.y = height as f64;
+        self.player.resize(&self.state);
+        self.ball.resize(&self.state);
+        fine::log!("Resolution {}x{}", self.state.screen.size.x, self.state.screen.size.y);
+    }
 
-        for drawable in self.drawables.iter_mut() {
-            drawable.resize(&self.state);
-        }
+    fn focus(&mut self) {
+        self.state.time = fine::wasm::now();
     }
 
     fn key_up(&mut self, keycode: KeyCode) {

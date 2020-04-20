@@ -1,4 +1,4 @@
-use crate::{common::Drawable, GameState};
+use crate::GameState;
 use fine::{math::Vec2, wasm::canvas};
 
 pub struct Ball {
@@ -11,8 +11,8 @@ impl Ball {
     pub fn new() -> Self {
         let position = Vec2::new();
         let mut acc = Vec2::new();
-        acc.x = 0.5;
-        acc.y = 0.5;
+        acc.x = 500.;
+        acc.y = 500.;
 
         Self {
             position,
@@ -25,27 +25,25 @@ impl Ball {
         self.position.x = x;
         self.position.y = y;
     }
-}
 
-impl Drawable for Ball {
-    fn resize(&mut self, s: &GameState) {
-        self.reset(s.screen.0 * 0.5, s.screen.1 * 0.5);
+    pub fn resize(&mut self, s: &GameState) {
+        self.reset(s.screen.size.x * 0.5, s.screen.size.y * 0.5);
     }
 
-    fn update(&mut self, s: &GameState) {
-        if self.position.x >= s.screen.0 || self.position.x <= 0. {
+    pub fn update(&mut self, s: &GameState) {
+        self.position.x += self.acc.x * s.dt;
+        self.position.y += self.acc.y * s.dt;
+
+        if self.position.x > s.screen.size.x || self.position.x < 0. {
             self.acc.x *= -1.;
         }
 
-        if self.position.y >= s.screen.1 || self.position.y <= 0. {
+        if self.position.y > s.screen.size.y || self.position.y < 0. {
             self.acc.y *= -1.;
         }
-
-        self.position.x += self.acc.x * s.dt;
-        self.position.y += self.acc.y * s.dt;
     }
 
-    fn draw(&self) {
+    pub fn draw(&self) {
         canvas::fill_style_static("green");
         canvas::begin_path();
         canvas::circle(self.position.x, self.position.y, self.radius);

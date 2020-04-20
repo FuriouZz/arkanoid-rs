@@ -12,5 +12,5 @@ export function console_warn(this: WASM, ptr: number, len: number) {
 }
 
 export function performance_now() {
-  return Date.now() / 1000.0
+  return performance.now()
 }

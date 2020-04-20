@@ -1,6 +1,7 @@
 use super::Rect;
 use super::Vec2;
 
+#[derive(Debug)]
 pub struct Circle {
     pub position: Vec2,
     pub radius: f64,

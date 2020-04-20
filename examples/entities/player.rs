@@ -1,4 +1,4 @@
-use crate::{common::Drawable, GameState};
+use crate::GameState;
 use fine::{event::KeyCode, math::Vec2, wasm::canvas};
 
 pub struct Player {
@@ -28,14 +28,12 @@ impl Player {
         self._position.y = y;
         self.position.y = y;
     }
-}
 
-impl Drawable for Player {
-    fn resize(&mut self, s: &GameState) {
-        self.reset(s.screen.0 * 0.5, s.screen.1 - self.size.y)
+    pub fn resize(&mut self, s: &GameState) {
+        self.reset(s.screen.size.x * 0.5, s.screen.size.y - self.size.y)
     }
 
-    fn update(&mut self, s: &GameState) {
+    pub fn update(&mut self, s: &GameState) {
         if s.pressed.contains(&KeyCode::Left) {
             self.position.x -= 1. * s.dt;
         }
@@ -49,18 +47,18 @@ impl Drawable for Player {
         if self.position.y < self.size.y * 0.5 {
             self.position.y = self.size.y * 0.5;
         }
-        if self.position.x + self.size.x * 0.5 > s.screen.0 {
-            self.position.x = s.screen.0 - self.size.x * 0.5;
+        if self.position.x + self.size.x * 0.5 > s.screen.size.x {
+            self.position.x = s.screen.size.x - self.size.x * 0.5;
         }
-        if self.position.y + self.size.y * 0.5 > s.screen.1 {
-            self.position.y = s.screen.1 - self.size.y * 0.5;
+        if self.position.y + self.size.y * 0.5 > s.screen.size.y {
+            self.position.y = s.screen.size.y - self.size.y * 0.5;
         }
 
         self._position.x += (self.position.x - self._position.x) * 0.125;
         self._position.y += (self.position.y - self._position.y) * 0.125;
     }
 
-    fn draw(&self) {
+    pub fn draw(&self) {
         canvas::fill_style_static("blue");
         canvas::fill_rect(
             self._position.x - self.size.x * 0.5,
@@ -69,4 +67,5 @@ impl Drawable for Player {
             self.size.y,
         );
     }
+
 }
