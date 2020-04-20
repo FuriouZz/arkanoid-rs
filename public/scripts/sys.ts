@@ -10,3 +10,7 @@ export function console_warn(this: WASM, ptr: number, len: number) {
   const bytes = new Uint8Array(this.memory.buffer, ptr, len)
   console.warn(decode_utf8(bytes))
 }
+
+export function performance_now() {
+  return Date.now() / 1000.0
+}

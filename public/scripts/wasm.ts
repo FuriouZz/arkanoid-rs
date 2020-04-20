@@ -6,16 +6,18 @@ import { EventType } from "./events.ts"
 interface WASMExports {
   main(): void
   resize(width: number, height: number): void
-  frame(dt: number): void
+  frame(): void
   pointer(event: EventType, x: number, y: number): void
   keyboard(event: EventType, keycode: number): void
+  focus(): void
+  blur(): void
 }
 
 export class WASM {
 
   ctx!: CanvasRenderingContext2D
   wasm!: WebAssembly.WebAssemblyInstantiatedSource
-  time: number = 0
+  paused = true
 
   get exports() {
     return this.wasm.instance.exports as unknown as WASMExports
@@ -55,7 +57,18 @@ export class WASM {
     window.addEventListener("pointermove", this.onPointer)
     window.addEventListener("keyup", this.onKeyboard)
     window.addEventListener("keydown", this.onKeyboard)
+    window.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        this.paused = true
+        this.exports.blur()
+      } else {
+        this.paused = false
+        this.exports.focus()
+        this.onFrame()
+      }
+    })
     this.onResize()
+    this.paused = false
     this.onFrame()
   }
 
@@ -68,11 +81,9 @@ export class WASM {
   }
 
   onFrame() {
-    const time = performance.now()
-    const dt = time - this.time;
-    this.time = time
+    if (this.paused) return
 
-    this.exports.frame(dt)
+    this.exports.frame()
     window.requestAnimationFrame(this.onFrame)
   }
 

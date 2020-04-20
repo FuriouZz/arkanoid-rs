@@ -34,16 +34,6 @@ impl Application {
         self.stage.as_mut().expect("No stage found")
     }
 
-    fn resize(&mut self, width: i32, height: i32) {
-        let stage = Application::get().get_stage();
-        stage.resize(width, height);
-    }
-
-    fn frame(&mut self, dt: f64) {
-        let stage = Application::get().get_stage();
-        stage.frame(dt);
-    }
-
     fn event(&mut self, e: Event) {
         let stage = Application::get().get_stage();
 
@@ -67,12 +57,26 @@ pub struct Event {
 
 #[no_mangle]
 extern "C" fn resize(width: i32, height: i32) {
-    Application::get().resize(width, height);
+    let stage = Application::get().get_stage();
+    stage.resize(width, height);
 }
 
 #[no_mangle]
-extern "C" fn frame(dt: f64) {
-    Application::get().frame(dt);
+extern "C" fn frame() {
+    let stage = Application::get().get_stage();
+    stage.frame();
+}
+
+#[no_mangle]
+extern "C" fn focus() {
+    let stage = Application::get().get_stage();
+    stage.focus();
+}
+
+#[no_mangle]
+extern "C" fn blur() {
+    let stage = Application::get().get_stage();
+    stage.blur();
 }
 
 #[no_mangle]
