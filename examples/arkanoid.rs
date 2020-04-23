@@ -30,6 +30,7 @@ pub struct GameState {
     pressed: HashSet<KeyCode>,
     dt: f64,
     time: f64,
+    sticky: bool,
 }
 
 impl GameState {
@@ -39,8 +40,9 @@ impl GameState {
         let state = Self {
             screen: Rect::new(),
             pressed,
-            time: 0.,
+            time: fine::wasm::now(),
             dt: 0.,
+            sticky: true,
         };
 
         state
@@ -53,12 +55,19 @@ impl EventHandler for Stage {
         self.state.dt = time - self.state.time;
         self.state.time = time;
 
+        if self.state.pressed.contains(&KeyCode::Space) {
+            self.state.sticky = false;
+        }
+
         self.player.update(&self.state);
-        self.ball.update(&self.state);
+        self.ball.update(&self.state, &self.player);
 
         canvas::clear();
         self.player.draw();
         self.ball.draw();
+
+        self.player.debug();
+        self.ball.debug();
     }
 
     fn resize(&mut self, width: i32, height: i32) {

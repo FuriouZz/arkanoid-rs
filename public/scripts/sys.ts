@@ -14,3 +14,7 @@ export function console_warn(this: WASM, ptr: number, len: number) {
 export function performance_now() {
   return performance.now()
 }
+
+export function random() {
+  return Math.random()
+}

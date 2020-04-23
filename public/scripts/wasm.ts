@@ -73,8 +73,8 @@ export class WASM {
   }
 
   onResize() {
-    this.ctx.canvas.width = window.innerWidth
-    this.ctx.canvas.height = window.innerHeight
+    this.ctx.canvas.width = window.innerWidth * 2.
+    this.ctx.canvas.height = window.innerHeight * 2.
     this.ctx.canvas.style.width = `${window.innerWidth}px`
     this.ctx.canvas.style.height = `${window.innerHeight}px`
     this.exports.resize(Math.floor(this.ctx.canvas.width), Math.floor(this.ctx.canvas.height))
