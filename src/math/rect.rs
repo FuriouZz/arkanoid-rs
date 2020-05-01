@@ -1,34 +1,35 @@
 use super::Line;
 use super::Vec2;
+use super::Size;
 
 #[derive(Debug)]
 pub struct Rect {
     pub position: Vec2,
-    pub size: Vec2,
+    pub size: Size,
 }
 
 impl Rect {
     pub fn new() -> Self {
         Self {
             position: Vec2 { x: 0., y: 0. },
-            size: Vec2 { x: 0., y: 0. },
+            size: Size { width: 0., height: 0. },
         }
     }
 
-    pub fn left(&self) -> f64 {
+    pub fn left(&self) -> f32 {
         self.position.x
     }
 
-    pub fn right(&self) -> f64 {
-        self.position.x + self.size.x
+    pub fn right(&self) -> f32 {
+        self.position.x + self.size.width
     }
 
-    pub fn top(&self) -> f64 {
+    pub fn top(&self) -> f32 {
         self.position.y
     }
 
-    pub fn bottom(&self) -> f64 {
-        self.position.y + self.size.y
+    pub fn bottom(&self) -> f32 {
+        self.position.y + self.size.height
     }
 
     pub fn top_left(&self) -> Vec2 {
@@ -40,7 +41,7 @@ impl Rect {
 
     pub fn top_right(&self) -> Vec2 {
         Vec2 {
-            x: self.position.x + self.size.x,
+            x: self.position.x + self.size.width,
             y: self.position.y,
         }
     }
@@ -48,14 +49,14 @@ impl Rect {
     pub fn bottom_left(&self) -> Vec2 {
         Vec2 {
             x: self.position.x,
-            y: self.position.y + self.size.y,
+            y: self.position.y + self.size.height,
         }
     }
 
     pub fn bottom_right(&self) -> Vec2 {
         Vec2 {
-            x: self.position.x + self.size.x,
-            y: self.position.y + self.size.y,
+            x: self.position.x + self.size.width,
+            y: self.position.y + self.size.height,
         }
     }
 

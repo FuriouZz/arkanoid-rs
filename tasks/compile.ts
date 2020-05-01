@@ -1,6 +1,5 @@
 import { walk } from "https://deno.land/std/fs/mod.ts";
 import { globToRegExp, normalize } from "https://deno.land/std/path/mod.ts";
-import { assert } from "https://deno.land/std/testing/asserts.ts";
 
 async function read_text(path: string) {
   const decoder = new TextDecoder("utf-8")
@@ -23,17 +22,17 @@ async function read_files(pattern: string, path = ".") {
 
   const files: Record<string, string> = {}
   for await (const entry of w) {
-    const file = entry.filename.slice(path.length)
-    files[`/${file}`] = await read_text(entry.filename)
+    if (entry.isFile) {
+      const file = entry.path.slice(path.length)
+      files[`/${file}`] = await read_text(entry.path)
+    }
   }
   return files
 }
 
 const files = await read_files("**/*.ts", "./public/scripts/")
 const [errors, emitted] = await Deno
-.bundle("/mod.ts", files, {
-  lib: [ "dom", "esnext" ]
-})
+.bundle("/mod.ts", files, { lib: [] })
 
 if (errors) {
   for (const error of errors) {

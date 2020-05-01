@@ -1,7 +1,7 @@
 use std::ffi::CString;
 use std::os::raw::c_char;
+use wasm_bindgen::prelude::*;
 
-#[no_mangle]
 extern "C" {
     fn console_log(ptr: *mut c_char, len: usize);
     fn console_warn(ptr: *mut c_char, len: usize);
@@ -25,4 +25,35 @@ macro_rules! log {
 #[macro_export]
 macro_rules! warn {
   ($($t:tt)*) => ($crate::wasm::console::warn(format!($($t)*).as_str()))
+}
+
+extern "C" {
+  fn performance_now() -> f64;
+  fn random() -> f64;
+}
+
+pub fn now() -> f64 {
+  unsafe { performance_now() }
+}
+
+pub fn rand() -> f64 {
+  unsafe { random() }
+}
+
+pub mod canvas {
+  #[repr(C)]
+  pub struct Size(pub u32, pub u32);
+
+  extern "C" {
+    fn canvas_create();
+    fn canvas_get_size() -> Size;
+  }
+
+  pub fn create() {
+    unsafe { canvas_create() }
+  }
+
+  pub fn get_size() -> Size {
+    unsafe { canvas_get_size() }
+  }
 }

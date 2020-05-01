@@ -1,15 +1,28 @@
 import Watcher from "https://deno.land/x/denon/watcher.ts";
 import { globToRegExp } from "https://deno.land/std/path/glob.ts";
 
+type ConfigExecutor = {
+  env?: Record<string, string>
+  args: string[]
+}
+
+type Config = {
+  watch: string[]
+  ext: string
+  execute: Record<string, ConfigExecutor[]>
+  fullscreen: boolean
+  interval: number
+}
+
 async function getConfig() {
   const decoder = new TextDecoder("utf-8")
   const data = await Deno.readFile("denow.json")
-  return JSON.parse(decoder.decode(data))
+  return JSON.parse(decoder.decode(data)) as Config
 }
 
-async function run(cmd: string[]) {
-  console.log(`> ${cmd.join(' ')}`)
-  const ps = Deno.run({ cmd })
+async function run(cmd: ConfigExecutor) {
+  console.log(`> ${cmd.args.join(' ')}`)
+  const ps = Deno.run({ cmd: cmd.args, env: cmd.env || {} })
   return ps.status()
 }
 
@@ -26,7 +39,7 @@ const executors = Object.entries(config.execute).map(([match, cmds]) => {
   return [
     globToRegExp(match, { extended: true, globstar: false }),
     cmds
-  ] as [RegExp, string[][]]
+  ] as [RegExp, ConfigExecutor[]]
 })
 
 for (const [regex, cmds] of executors) {

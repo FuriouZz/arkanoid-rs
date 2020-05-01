@@ -89,7 +89,7 @@ impl Circle {
             return false;
         }
         // One circle is bigger than the other
-        else if distance < f64::abs(self.radius - c0.radius) {
+        else if distance < f32::abs(self.radius - c0.radius) {
             return false;
         }
 
@@ -135,7 +135,7 @@ impl Circle {
         middle.x += self.position.x;
         middle.y += self.position.y;
 
-        let h = f64::sqrt(a * a + c0.radius * c0.radius);
+        let h = f32::sqrt(a * a + c0.radius * c0.radius);
 
         let mut i = Vec2 {
             x: middle.y,
@@ -186,7 +186,7 @@ impl Circle {
 fn test_rect() {
     let r0 = Rect {
         position: Vec2 { x: 0., y: 0. },
-        size: Vec2 { x: 10., y: 10. },
+        size: Size { width: 10., height: 10. },
     };
 
     let v0 = Vec2 { x: 5., y: 5. };
@@ -194,7 +194,7 @@ fn test_rect() {
 
     let mut r1 = Rect {
         position: Vec2 { x: 5., y: 5. },
-        size: Vec2 { x: 5., y: 5. },
+        size: Size { width: 5., height: 5. },
     };
 
     let intersect = r0.intersect_rect(&r1);

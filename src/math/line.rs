@@ -13,7 +13,7 @@ impl Line {
         }
     }
 
-    pub fn length(&self) -> f64 {
+    pub fn length(&self) -> f32 {
         self.v0.distance(&self.v1)
     }
 }

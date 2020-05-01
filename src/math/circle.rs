@@ -1,10 +1,11 @@
 use super::Rect;
 use super::Vec2;
+use super::Size;
 
 #[derive(Debug)]
 pub struct Circle {
     pub position: Vec2,
-    pub radius: f64,
+    pub radius: f32,
 }
 
 impl Circle {
@@ -21,9 +22,9 @@ impl Circle {
                 x: self.position.x - self.radius,
                 y: self.position.y - self.radius,
             },
-            size: Vec2 {
-                x: self.position.x - self.radius + self.radius * 2.,
-                y: self.position.y - self.radius + self.radius * 2.,
+            size: Size {
+                width: self.position.x - self.radius + self.radius * 2.,
+                height: self.position.y - self.radius + self.radius * 2.,
             },
         }
     }

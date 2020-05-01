@@ -1,32 +1,21 @@
 pub mod key;
 pub use key::KeyCode;
 
+pub enum Event {
+    PointerUp(f32, f32),
+    PointerDown(f32, f32),
+    PointerMove(f32, f32),
+    KeyUp(KeyCode),
+    KeyDown(KeyCode),
+    KeyPressed(KeyCode),
+    Focus,
+    Blur,
+    Frame,
+    RedrawRequested,
+    Resize(u32, u32),
+}
+
 pub trait EventHandler {
-    fn frame(&mut self) {}
-    fn focus(&mut self) {}
-    fn blur(&mut self) {}
-    fn resize(&mut self, _width: i32, _height: i32) {}
-    fn pointer_up(&mut self, _x: i32, _y: i32) {}
-    fn pointer_down(&mut self, _x: i32, _y: i32) {}
-    fn pointer_move(&mut self, _x: i32, _y: i32) {}
-    fn key_up(&mut self, _keycode: KeyCode) {}
-    fn key_down(&mut self, _keycode: KeyCode) {}
-    fn key_pressed(&mut self, _keycode: KeyCode) {}
-}
-
-#[derive(Debug)]
-pub enum EventType {
-    PointerUp,
-    PointerDown,
-    PointerMove,
-    KeyUp,
-    KeyDown,
-    KeyPressed,
-}
-
-#[derive(Debug)]
-pub struct Event {
-    pub event: EventType,
-    pub values: [i32; 4],
-    pub keycode: crate::wasm::key::KeyCode,
+    fn init(&mut self);
+    fn on_event(&mut self, e: Event);
 }

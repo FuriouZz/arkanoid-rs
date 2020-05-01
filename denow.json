@@ -7,11 +7,22 @@
   "ext": "html,ts,rs",
   "execute": {
     "*.ts": [
-      ["deno", "--allow-read", "--allow-write", "tasks/compile.ts"]
+      {
+        "env": {},
+        "args": ["deno", "--allow-read", "--allow-write", "--unstable", "tasks/compile.ts"]
+      }
     ],
     "*.rs": [
-      ["cargo", "build", "--target", "wasm32-unknown-unknown", "--example", "arkanoid"],
-      ["cp", "target/wasm32-unknown-unknown/debug/examples/arkanoid.wasm", "public/arkanoid.wasm"]
+      {
+        "env": {
+          "RUSTFLAGS": "--cfg=web_sys_unstable_apis"
+        },
+        "args": ["cargo", "build", "--target", "wasm32-unknown-unknown", "--example", "arkanoid"]
+      },
+      {
+        "env": {},
+        "args": [ "wasm-bindgen", "--out-dir", "target/generated", "--web", "target/wasm32-unknown-unknown/debug/examples/arkanoid.wasm" ]
+      }
     ]
   },
   "fullscreen": false,
