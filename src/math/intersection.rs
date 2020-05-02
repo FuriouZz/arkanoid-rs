@@ -66,7 +66,7 @@ impl Rect {
         self.intersects_rect(&c0.get_rect())
     }
 
-    pub fn intersect_circle(&self, c0: &Circle) -> Option<Vec<Vec2>> {
+    pub fn intersect_circle(&self, _c0: &Circle) -> Option<Vec<Vec2>> {
         unimplemented!()
     }
 }
@@ -173,11 +173,11 @@ impl Circle {
         self.contains_vec2(&l0.v0) && self.contains_vec2(&l0.v1)
     }
 
-    pub fn interects_line(&self, l0: &Line) -> bool {
+    pub fn interects_line(&self, _l0: &Line) -> bool {
         unimplemented!()
     }
 
-    pub fn intersect_line(&self, l0: &Line) -> Option<Vec<Vec2>> {
+    pub fn intersect_line(&self, _l0: &Line) -> Option<Vec<Vec2>> {
         unimplemented!()
     }
 }
@@ -186,7 +186,10 @@ impl Circle {
 fn test_rect() {
     let r0 = Rect {
         position: Vec2 { x: 0., y: 0. },
-        size: Size { width: 10., height: 10. },
+        size: super::Size {
+            width: 10.,
+            height: 10.,
+        },
     };
 
     let v0 = Vec2 { x: 5., y: 5. };
@@ -194,7 +197,10 @@ fn test_rect() {
 
     let mut r1 = Rect {
         position: Vec2 { x: 5., y: 5. },
-        size: Size { width: 5., height: 5. },
+        size: super::Size {
+            width: 5.,
+            height: 5.,
+        },
     };
 
     let intersect = r0.intersect_rect(&r1);

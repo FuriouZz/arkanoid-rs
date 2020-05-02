@@ -1,6 +1,6 @@
 use super::Line;
-use super::Vec2;
 use super::Size;
+use super::Vec2;
 
 #[derive(Debug)]
 pub struct Rect {
@@ -12,7 +12,10 @@ impl Rect {
     pub fn new() -> Self {
         Self {
             position: Vec2 { x: 0., y: 0. },
-            size: Size { width: 0., height: 0. },
+            size: Size {
+                width: 0.,
+                height: 0.,
+            },
         }
     }
 

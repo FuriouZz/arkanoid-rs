@@ -1,6 +1,6 @@
+pub use wgpu::BlendDescriptor;
 pub use wgpu::BlendFactor;
 pub use wgpu::BlendOperation;
-pub use wgpu::BlendDescriptor;
 
 pub const DEFAULT: BlendDescriptor = BlendDescriptor {
     src_factor: BlendFactor::One,

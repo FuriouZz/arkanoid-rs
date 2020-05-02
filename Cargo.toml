@@ -4,6 +4,8 @@ version = "0.1.0"
 authors = ["Christophe MASSOLIN <christophe.massolin@gmail.com>"]
 edition = "2018"
 
+[lib]
+
 [dependencies]
 wgpu = "0.5.0"
 raw-window-handle = "0.3.3"

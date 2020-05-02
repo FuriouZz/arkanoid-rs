@@ -91,20 +91,23 @@
 //     }
 // }
 
-pub struct ArkanoidScene {
-
-}
+pub struct ArkanoidScene {}
 
 impl fine::Scene for ArkanoidScene {
-    fn on_init(&mut self, window: &fine::Window, device: &wgpu::Device) {}
+    fn on_init(&mut self, window: &fine::Window, device: &wgpu::Device) {
+        fine::log!("Arkanoid initialized 🥰");
+    }
     fn on_event(&mut self, e: fine::event::Event) {}
-    fn on_draw(&mut self, frame: &wgpu::SwapChainOutput, device: &wgpu::Device) -> Option<wgpu::CommandBuffer> {
+    fn on_draw(
+        &mut self,
+        frame: &wgpu::SwapChainOutput,
+        device: &wgpu::Device,
+    ) -> Option<wgpu::CommandBuffer> {
         None
     }
 }
 
 fn main() {
-    // fine::log!("lol");
     let scene = ArkanoidScene {};
-    fine::start(scene);
+    fine::start(scene, Default::default());
 }

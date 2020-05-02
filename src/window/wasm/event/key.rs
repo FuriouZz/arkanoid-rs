@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 pub type KeyCode = u32;
 
 pub const BACKSPACE: KeyCode = 8;

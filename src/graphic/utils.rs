@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 pub fn format_size(format: &wgpu::VertexFormat) -> wgpu::BufferAddress {
     match format {
         wgpu::VertexFormat::Char2 => 1 * 2,

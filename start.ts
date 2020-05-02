@@ -7,9 +7,9 @@ async function run(cmd: string[], cwd?: string) {
 const command = Deno.args[0]
 
 if (command == "compile") {
-  await run([ "deno", "--allow-read", "--allow-write", "tasks/compile.ts" ])
+  await run([ "deno", "--allow-read", "--allow-write", "--unstable", "tasks/compile.ts" ])
 } else if (command == "server") {
-  await run([ "npx", "http-server" ], 'public')
+  await run([ "deno", "--allow-net", "--allow-read", "../tasks/server.ts" ], 'public')
 } else {
   await run([ "deno", "--allow-read", "--allow-run", "tasks/watch.ts" ])
 }

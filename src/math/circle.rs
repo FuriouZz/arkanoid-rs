@@ -1,6 +1,6 @@
 use super::Rect;
-use super::Vec2;
 use super::Size;
+use super::Vec2;
 
 #[derive(Debug)]
 pub struct Circle {

@@ -21,7 +21,7 @@
       },
       {
         "env": {},
-        "args": [ "wasm-bindgen", "--out-dir", "target/generated", "--web", "target/wasm32-unknown-unknown/debug/examples/arkanoid.wasm" ]
+        "args": [ "wasm-bindgen", "--out-dir", "public/generated", "--web", "target/wasm32-unknown-unknown/debug/examples/arkanoid.wasm" ]
       }
     ]
   },

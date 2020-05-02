@@ -6,7 +6,10 @@ pub struct Size {
 
 impl Size {
     pub fn new() -> Self {
-        Self { width: 0., height: 0. }
+        Self {
+            width: 0.,
+            height: 0.,
+        }
     }
 
     pub fn normalize(&mut self) {

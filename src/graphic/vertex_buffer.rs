@@ -5,6 +5,7 @@ pub trait VertexAttributeDescriptor {
     const ATTRIBUTES: &'static [wgpu::VertexAttributeDescriptor];
 }
 
+#[allow(dead_code)]
 pub mod defaults {
     use super::VertexAttributeDescriptor;
 
@@ -66,5 +67,4 @@ pub mod defaults {
             },
         ];
     }
-
 }
