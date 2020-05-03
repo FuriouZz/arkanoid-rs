@@ -68,7 +68,7 @@ fn create_triangle(device: &wgpu::Device) -> Triangle {
         }),
         primitive_topology: wgpu::PrimitiveTopology::TriangleList,
         color_states: &[wgpu::ColorStateDescriptor {
-            format: crate::DEFAULT_TEXTURE_FORMAT,
+            format: fine::graphic::DEFAULT_TEXTURE_FORMAT,
             color_blend: wgpu::BlendDescriptor::REPLACE,
             alpha_blend: wgpu::BlendDescriptor::REPLACE,
             write_mask: wgpu::ColorWrite::ALL,

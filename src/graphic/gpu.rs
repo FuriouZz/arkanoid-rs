@@ -19,7 +19,7 @@ impl Default for GpuOptions {
             power_preference: wgpu::PowerPreference::Default,
             backends: wgpu::BackendBit::PRIMARY,
             usage: wgpu::TextureUsage::OUTPUT_ATTACHMENT,
-            format: wgpu::TextureFormat::Bgra8Unorm,
+            format: super::DEFAULT_TEXTURE_FORMAT,
             present_mode: wgpu::PresentMode::Mailbox,
             device: wgpu::DeviceDescriptor {
                 extensions: wgpu::Extensions {

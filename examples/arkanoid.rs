@@ -93,9 +93,6 @@ use drawables::Drawable;
 //     }
 // }
 
-pub const DEFAULT_TEXTURE_FORMAT: fine::graphic::wgpu::TextureFormat =
-    wgpu::TextureFormat::Bgra8Unorm;
-
 pub struct ArkanoidScene {
     drawable: entities::Brick,
 }
