@@ -1,4 +1,7 @@
+mod drawables;
 mod entities;
+use drawables::Drawable;
+
 // use std::collections::HashSet;
 
 // use fine::{
@@ -90,49 +93,36 @@ mod entities;
 //     }
 // }
 
+pub const DEFAULT_TEXTURE_FORMAT: fine::graphic::wgpu::TextureFormat =
+    wgpu::TextureFormat::Bgra8Unorm;
+
 pub struct ArkanoidScene {
-    triangle: Option<entities::Triangle>,
+    drawable: entities::Brick,
 }
 
 impl fine::Scene for ArkanoidScene {
     fn on_init(
         &mut self,
         window: &fine::Window,
-        frame: &wgpu::SwapChainOutput,
         device: &wgpu::Device,
+        frame: &wgpu::SwapChainOutput,
     ) -> Option<wgpu::CommandBuffer> {
         fine::log!("Arkanoid initialized 🥰");
-        let triangle = entities::Triangle::new(device);
-
-        let mut encoder =
-        device.create_command_encoder(&fine::graphic::wgpu::CommandEncoderDescriptor {
-            label: None,
-        });
-
-        triangle.draw(&mut encoder, &frame.view);
-        self.triangle = Some(triangle);
-
-        Some(encoder.finish())
+        self.drawable.create_pipeline(device, frame)
     }
     fn on_event(&mut self, e: fine::event::Event) {}
     fn on_draw(
         &mut self,
-        frame: &wgpu::SwapChainOutput,
         device: &wgpu::Device,
+        frame: &wgpu::SwapChainOutput,
     ) -> Option<wgpu::CommandBuffer> {
-        self.triangle.as_ref().map(|triangle| {
-            let mut encoder =
-                device.create_command_encoder(&fine::graphic::wgpu::CommandEncoderDescriptor {
-                    label: None,
-                });
-
-            triangle.draw(&mut encoder, &frame.view);
-            encoder.finish()
-        })
+        self.drawable.render_pipeline(device, frame)
     }
 }
 
 fn main() {
-    let scene = ArkanoidScene { triangle: None };
+    let scene = ArkanoidScene {
+        drawable: entities::Brick::new(),
+    };
     fine::start(scene, Default::default());
 }

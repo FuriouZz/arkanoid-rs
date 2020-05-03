@@ -17,7 +17,7 @@ impl Context {
             .get_next_texture()
             .expect("Timeout when acquiring next swap chain texture");
 
-        let command_buf = self.scene.on_init(&self.window, &frame, &self.gpu.device);
+        let command_buf = self.scene.on_init(&self.window, &self.gpu.device, &frame);
         self.gpu.queue.submit(command_buf);
     }
 
@@ -38,7 +38,7 @@ impl Context {
                     .swap_chain
                     .get_next_texture()
                     .expect("Timeout when acquiring next swap chain texture");
-                let command_buf = self.scene.on_draw(&frame, &self.gpu.device);
+                let command_buf = self.scene.on_draw(&self.gpu.device, &frame);
                 self.gpu.queue.submit(command_buf);
             }
             _ => {}

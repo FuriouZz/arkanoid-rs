@@ -1,4 +1,3 @@
-
 pub trait VertexAttributeDescriptor {
     /// The stride, in bytes, between elements of this buffer.
     const STRIDE: wgpu::BufferAddress;
@@ -13,7 +12,7 @@ pub mod position {
     #[repr(C)]
     #[derive(Clone, Copy, Debug)]
     pub struct Vertex {
-        pub position: (f32, f32, f32)
+        pub position: (f32, f32, f32),
     }
 
     unsafe impl Pod for Vertex {}
@@ -38,7 +37,7 @@ pub mod position_texcoord {
     #[derive(Clone, Copy, Debug)]
     pub struct Vertex {
         pub position: (f32, f32, f32),
-        pub texcoord: (f32, f32)
+        pub texcoord: (f32, f32),
     }
 
     unsafe impl Pod for Vertex {}

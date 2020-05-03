@@ -1,20 +1,22 @@
-use fine::graphic::vertex_attribute::{position::Vertex, VertexAttributeDescriptor};
+use fine::graphic::vertex_attribute::{position_texcoord::Vertex, VertexAttributeDescriptor};
 use fine::graphic::wgpu;
 
-fn vertex(x: f32, y: f32, z: f32) -> Vertex {
+fn vertex(x: f32, y: f32, z: f32, u: f32, v: f32) -> Vertex {
     Vertex {
         position: (x, y, z),
+        texcoord: (u, v),
     }
 }
 
-fn create_triangle(device: &wgpu::Device) -> Triangle {
+fn create_quad(device: &wgpu::Device) -> Quad {
     let vertices: Vec<Vertex> = vec![
-        vertex(0., 1.0, 0.),
-        vertex(1.0, -1.0, 0.),
-        vertex(-1.0, -1.0, 0.),
+        vertex(-1.0, -1.0, 0., 0.0, 0.0),
+        vertex(-1.0, 1.0, 0., 0.0, 1.0),
+        vertex(1.0, 1.0, 0., 1.0, 1.0),
+        vertex(1.0, -1.0, 0., 1.0, 0.0),
     ];
 
-    let indices: Vec<u16> = vec![0, 1, 2];
+    let indices: Vec<u16> = vec![0, 1, 2, 0, 2, 3];
 
     let vertex_buffer = device.create_buffer_with_data(
         fine::bytemuck::cast_slice(&vertices),
@@ -41,10 +43,10 @@ fn create_triangle(device: &wgpu::Device) -> Triangle {
         bind_group_layouts: &[&bind_group_layout],
     });
 
-    let source = include_bytes!("./triangle.vert.spv");
+    let source = include_bytes!("./quad.vert.spv");
     let vertex_module =
         device.create_shader_module(&wgpu::read_spirv(std::io::Cursor::new(&source[..])).unwrap());
-    let source = include_bytes!("./triangle.frag.spv");
+    let source = include_bytes!("./quad.frag.spv");
     let fragment_module =
         device.create_shader_module(&wgpu::read_spirv(std::io::Cursor::new(&source[..])).unwrap());
 
@@ -67,7 +69,7 @@ fn create_triangle(device: &wgpu::Device) -> Triangle {
         }),
         primitive_topology: wgpu::PrimitiveTopology::TriangleList,
         color_states: &[wgpu::ColorStateDescriptor {
-            format: wgpu::TextureFormat::Bgra8Unorm,
+            format: crate::DEFAULT_TEXTURE_FORMAT,
             color_blend: wgpu::BlendDescriptor::REPLACE,
             alpha_blend: wgpu::BlendDescriptor::REPLACE,
             write_mask: wgpu::ColorWrite::ALL,
@@ -86,7 +88,7 @@ fn create_triangle(device: &wgpu::Device) -> Triangle {
         alpha_to_coverage_enabled: false,
     });
 
-    Triangle {
+    Quad {
         pipeline,
         vertex_buffer,
         index_buffer,
@@ -95,7 +97,7 @@ fn create_triangle(device: &wgpu::Device) -> Triangle {
     }
 }
 
-pub struct Triangle {
+pub struct Quad {
     pipeline: wgpu::RenderPipeline,
     vertex_buffer: wgpu::Buffer,
     index_buffer: wgpu::Buffer,
@@ -103,9 +105,9 @@ pub struct Triangle {
     bind_group: wgpu::BindGroup,
 }
 
-impl Triangle {
+impl Quad {
     pub fn new(device: &wgpu::Device) -> Self {
-        create_triangle(device)
+        create_quad(device)
     }
 
     pub fn draw(&self, encoder: &mut wgpu::CommandEncoder, view: &wgpu::TextureView) {
@@ -115,9 +117,14 @@ impl Triangle {
                 resolve_target: None,
                 load_op: wgpu::LoadOp::Clear,
                 store_op: wgpu::StoreOp::Store,
-                clear_color: wgpu::Color::GREEN,
+                clear_color: wgpu::Color {
+                    r: 0.,
+                    g: 0.,
+                    b: 0.,
+                    a: 1.,
+                },
             }],
-            depth_stencil_attachment: None
+            depth_stencil_attachment: None,
         });
 
         pass.set_pipeline(&self.pipeline);

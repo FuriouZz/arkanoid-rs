@@ -4,9 +4,9 @@ pub mod graphic;
 pub mod math;
 mod scene;
 mod window;
+pub use bytemuck;
 pub use scene::*;
 pub use window::*;
-pub use bytemuck;
 
 async fn start_async<S: 'static + Scene>(scene: S, graphic_options: graphic::GpuOptions) {
     {
@@ -19,8 +19,8 @@ async fn start_async<S: 'static + Scene>(scene: S, graphic_options: graphic::Gpu
     let window = Window::new();
 
     let gpu = graphic::Gpu::create(&window, &graphic_options)
-    .await
-    .expect("Cannot initialize Gpu.");
+        .await
+        .expect("Cannot initialize Gpu.");
 
     let context = context::Context {
         window,

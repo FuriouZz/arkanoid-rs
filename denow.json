@@ -29,12 +29,20 @@
       {
         "env": {},
         "args": [ "glslc", "${dir}/${base}", "-o", "${dir}/${base}.spv" ]
+      },
+      {
+        "env": {},
+        "args": [ "touch", "src/lib.rs" ]
       }
     ],
     "*.frag": [
       {
         "env": {},
         "args": [ "glslc", "${dir}/${base}", "-o", "${dir}/${base}.spv" ]
+      },
+      {
+        "env": {},
+        "args": [ "touch", "src/lib.rs" ]
       }
     ]
   },

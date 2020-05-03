@@ -1,2 +1,2 @@
-mod triangle;
-pub use triangle::*;
+mod brick;
+pub use brick::*;
