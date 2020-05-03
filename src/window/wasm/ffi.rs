@@ -8,7 +8,7 @@ extern "C" {
     pub fn warn(s: &str);
 }
 
-#[wasm_bindgen(module = "/public/imports.js")]
+#[wasm_bindgen(raw_module = "../imports.js")]
 extern "C" {
     pub type Canvas;
 
@@ -27,6 +27,9 @@ extern "C" {
     #[wasm_bindgen(method)]
     pub fn resize(this: &Canvas, width: u32, height: u32);
 
+    #[wasm_bindgen(method)]
+    pub fn ready(this: &Canvas);
+
     pub fn now() -> f64;
     pub fn rand() -> f64;
 }
@@ -39,9 +42,4 @@ macro_rules! log {
 #[macro_export]
 macro_rules! warn {
   ($($t:tt)*) => ($crate::ffi::warn(format!($($t)*).as_str()))
-}
-
-#[wasm_bindgen]
-pub fn greet(name: &str) {
-    // alert(&format!("Hello, {}!", name));
 }

@@ -1,120 +1,103 @@
+use super::super::ffi;
+use crate::event::Event;
+use std::sync::Once;
 use wasm_bindgen::prelude::*;
 
-#[wasm_bindgen]
-pub struct Bridge {}
+static mut BRIDGE: Option<Bridge> = None;
+static START_BRIDGE: Once = Once::new();
 
 #[wasm_bindgen]
+pub struct Bridge {
+    handler: Option<crate::context::Context>,
+}
+
 impl Bridge {
-    #[wasm_bindgen(constructor)]
-    pub fn new() -> Self {
-        Self {}
+    pub(crate) unsafe fn init<F>(init: F) -> &'static mut Self
+    where
+        F: FnOnce() -> crate::context::Context,
+    {
+        let bridge = Bridge::get();
+        let mut handler = init();
+        bridge.handler = Some(handler);
+        ffi::log("Bridge initialized 🔧");
+        bridge.get_handler().init();
+        bridge
     }
 
-    #[wasm_bindgen]
-    pub fn resize(&self) {
-        crate::ffi::log("resize");
+    pub fn get() -> &'static mut Self {
+        START_BRIDGE.call_once(|| unsafe {
+            BRIDGE = Some(Self { handler: None });
+        });
+
+        unsafe { BRIDGE.as_mut().expect("Application is not initialized.") }
+    }
+
+    fn get_handler(&mut self) -> &mut crate::context::Context {
+        self.handler.as_mut().expect("No stage found")
+    }
+
+    fn on_event(&mut self, e: Event) {
+        let handler = Bridge::get().get_handler();
+        handler.on_event(e);
     }
 }
 
-// use super::super::ffi;
-// use crate::event::{Event, EventHandler, KeyCode};
-// use std::sync::Once;
+#[wasm_bindgen]
+pub fn on_resize(width: u32, height: u32) {
+    let bridge = Bridge::get();
+    bridge.on_event(Event::Resize(width, height));
+}
 
-// static mut BRIDGE: Option<Bridge> = None;
-// static START_BRIDGE: Once = Once::new();
+#[wasm_bindgen]
+pub fn on_frame() {
+    let bridge = Bridge::get();
+    bridge.on_event(Event::Frame);
+}
 
-// pub struct Bridge {
-//     handler: Option<Box<dyn EventHandler>>,
-// }
+#[wasm_bindgen]
+pub fn on_focus() {
+    let bridge = Bridge::get();
+    bridge.on_event(Event::Focus);
+}
 
-// impl Bridge {
-//     pub unsafe fn init<T, F>(init: F) -> &'static mut Self
-//     where
-//         T: EventHandler + 'static,
-//         F: FnOnce() -> T,
-//     {
-//         let bridge = Bridge::get();
-//         let mut handler = Box::new(init());
-//         handler.init();
-//         bridge.handler = Some(handler);
-//         bridge
-//     }
+#[wasm_bindgen]
+pub fn on_blur() {
+    let bridge = Bridge::get();
+    bridge.on_event(Event::Blur);
+}
 
-//     pub fn get() -> &'static mut Self {
-//         START_BRIDGE.call_once(|| unsafe {
-//             BRIDGE = Some(Self { handler: None });
-//             ffi::log("Application initialized 🥰");
-//         });
+#[wasm_bindgen]
+pub fn on_pointer_move(x: i32, y: i32) {
+    let bridge = Bridge::get();
+    bridge.on_event(Event::PointerMove(x as f32, y as f32));
+}
 
-//         unsafe { BRIDGE.as_mut().expect("Application is not initialized.") }
-//     }
+#[wasm_bindgen]
+pub fn on_pointer_up(x: i32, y: i32) {
+    let bridge = Bridge::get();
+    bridge.on_event(Event::PointerUp(x as f32, y as f32));
+}
 
-//     fn get_handler(&mut self) -> &mut Box<dyn EventHandler> {
-//         self.handler.as_mut().expect("No stage found")
-//     }
+#[wasm_bindgen]
+pub fn on_pointer_down(x: i32, y: i32) {
+    let bridge = Bridge::get();
+    bridge.on_event(Event::PointerDown(x as f32, y as f32));
+}
 
-//     fn on_event(&mut self, e: Event) {
-//         let handler = Bridge::get().get_handler();
-//         handler.on_event(e);
-//     }
-// }
+#[wasm_bindgen]
+pub fn on_key_pressed(key: super::key::KeyCode) {
+    let bridge = Bridge::get();
+    bridge.on_event(Event::KeyPressed(key.into()));
+}
 
-// #[no_mangle]
-// extern "C" fn resize(width: u32, height: u32) {
-//     let bridge = Bridge::get();
-//     bridge.on_event(Event::Resize(width, height));
-// }
+#[wasm_bindgen]
+pub fn on_key_up(key: super::key::KeyCode) {
+    let bridge = Bridge::get();
+    bridge.on_event(Event::KeyUp(key.into()));
+}
 
-// #[no_mangle]
-// extern "C" fn frame() {
-//     let bridge = Bridge::get();
-//     bridge.on_event(Event::Frame);
-// }
-
-// #[no_mangle]
-// extern "C" fn focus() {
-//     let bridge = Bridge::get();
-//     bridge.on_event(Event::Focus);
-// }
-
-// #[no_mangle]
-// extern "C" fn blur() {
-//     let bridge = Bridge::get();
-//     bridge.on_event(Event::Blur);
-// }
-
-// #[no_mangle]
-// extern "C" fn pointer_move(x: i32, y: i32) {
-//     let bridge = Bridge::get();
-//     bridge.on_event(Event::PointerMove(x as f32, y as f32));
-// }
-
-// #[no_mangle]
-// extern "C" fn pointer_up(x: i32, y: i32) {
-//     let bridge = Bridge::get();
-//     bridge.on_event(Event::PointerUp(x as f32, y as f32));
-// }
-
-// #[no_mangle]
-// extern "C" fn pointer_down(x: i32, y: i32) {
-//     let bridge = Bridge::get();
-//     bridge.on_event(Event::PointerDown(x as f32, y as f32));
-// }
-
-// #[no_mangle]
-// extern "C" fn key_pressed(key: KeyCode) {
-//     let bridge = Bridge::get();
-//     bridge.on_event(Event::KeyPressed(key));
-// }
-
-// #[no_mangle]
-// extern "C" fn key_up(key: KeyCode) {
-//     let bridge = Bridge::get();
-//     bridge.on_event(Event::KeyUp(key));
-// }
-
-// #[no_mangle]
-// extern "C" fn key_down(key: KeyCode) {
-//     let bridge = Bridge::get();
-//     bridge.on_event(Event::KeyDown(key));
-// }
+#[wasm_bindgen]
+pub fn on_key_down(key: super::key::KeyCode) {
+    let bridge = Bridge::get();
+    bridge.on_event(Event::KeyDown(key.into()));
+}

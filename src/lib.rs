@@ -11,15 +11,15 @@ async fn start_async<S: 'static + Scene>(scene: S, graphic_options: graphic::Gpu
     {
         std::panic::set_hook(Box::new(|info| {
             let msg = format!("{:?}", info);
-            window::ffi::warn(msg.as_str());
+            ffi::warn(msg.as_str());
         }));
     }
 
     let window = Window::new();
 
     let gpu = graphic::Gpu::create(&window, &graphic_options)
-        .await
-        .expect("Cannot initialize Gpu.");
+    .await
+    .expect("Cannot initialize Gpu.");
 
     let context = context::Context {
         window,
@@ -27,9 +27,9 @@ async fn start_async<S: 'static + Scene>(scene: S, graphic_options: graphic::Gpu
         gpu,
     };
 
-    // unsafe {
-    //     window::event::Bridge::init(|| context);
-    // }
+    unsafe {
+        window::event::Bridge::init(|| context);
+    }
 }
 
 pub fn start<S: 'static + Scene>(scene: S, graphic_options: graphic::GpuOptions) {

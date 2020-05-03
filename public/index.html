@@ -4,10 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
+  <style>
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  </style>
 </head>
 <body>
   <script type="module">
-    import init from './generated/arkanoid.js'
+    import init, * as Bridge from './generated/arkanoid.js'
+    import { EventBridge } from './events.js'
+
+    new EventBridge(Bridge)
     init()
   </script>
 </body>

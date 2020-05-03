@@ -1,20 +1,20 @@
-use crate::event::{Event, EventHandler};
+use crate::event::Event;
 use crate::Window;
+use wasm_bindgen::describe::WasmDescribe;
 
-pub struct Context {
-    pub window: Window,
-    pub scene: Box<dyn crate::Scene>,
-    pub gpu: crate::graphic::Gpu,
+pub(crate) struct Context {
+    pub(crate) window: Window,
+    pub(crate) scene: Box<dyn crate::Scene>,
+    pub(crate) gpu: crate::graphic::Gpu,
 }
 
-impl Context {}
-
-impl EventHandler for Context {
-    fn init(&mut self) {
+impl Context {
+    pub(crate) fn init(&mut self) {
+        self.window.ready();
         self.scene.on_init(&self.window, &self.gpu.device);
     }
 
-    fn on_event(&mut self, e: Event) {
+    pub(crate) fn on_event(&mut self, e: Event) {
         match e {
             Event::Resize(width, height) => {
                 self.window.resize(width, height);

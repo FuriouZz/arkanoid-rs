@@ -14,8 +14,3 @@ pub enum Event {
     RedrawRequested,
     Resize(u32, u32),
 }
-
-pub trait EventHandler {
-    fn init(&mut self);
-    fn on_event(&mut self, e: Event);
-}

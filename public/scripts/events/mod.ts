@@ -1,4 +1,1 @@
-/// <reference lib="dom" />
-/// <reference lib="esnext" />
-
-export * from "./handler.ts"
+export * from "./event_bridge.ts"

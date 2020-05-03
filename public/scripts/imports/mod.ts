@@ -1,6 +1,3 @@
-/// <reference lib="dom" />
-/// <reference lib="esnext" />
-
 export * from "./canvas.ts"
 
 export function now() {
