@@ -6,6 +6,7 @@ mod scene;
 mod window;
 pub use scene::*;
 pub use window::*;
+pub use bytemuck;
 
 async fn start_async<S: 'static + Scene>(scene: S, graphic_options: graphic::GpuOptions) {
     {

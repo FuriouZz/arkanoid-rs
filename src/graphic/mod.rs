@@ -1,10 +1,8 @@
 mod binding;
 pub mod blend;
 mod utils;
-mod vertex_buffer;
+pub mod vertex_attribute;
 pub use binding::*;
-pub use vertex_buffer::defaults as VertexAttributeDescriptors;
-pub use vertex_buffer::VertexAttributeDescriptor;
 pub use wgpu;
 mod gpu;
 pub use gpu::*;

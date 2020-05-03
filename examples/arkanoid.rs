@@ -1,5 +1,4 @@
-// mod entities;
-// use entities::*;
+mod entities;
 // use std::collections::HashSet;
 
 // use fine::{
@@ -91,11 +90,29 @@
 //     }
 // }
 
-pub struct ArkanoidScene {}
+pub struct ArkanoidScene {
+    triangle: Option<entities::Triangle>,
+}
 
 impl fine::Scene for ArkanoidScene {
-    fn on_init(&mut self, window: &fine::Window, device: &wgpu::Device) {
+    fn on_init(
+        &mut self,
+        window: &fine::Window,
+        frame: &wgpu::SwapChainOutput,
+        device: &wgpu::Device,
+    ) -> Option<wgpu::CommandBuffer> {
         fine::log!("Arkanoid initialized 🥰");
+        let triangle = entities::Triangle::new(device);
+
+        let mut encoder =
+        device.create_command_encoder(&fine::graphic::wgpu::CommandEncoderDescriptor {
+            label: None,
+        });
+
+        triangle.draw(&mut encoder, &frame.view);
+        self.triangle = Some(triangle);
+
+        Some(encoder.finish())
     }
     fn on_event(&mut self, e: fine::event::Event) {}
     fn on_draw(
@@ -103,11 +120,19 @@ impl fine::Scene for ArkanoidScene {
         frame: &wgpu::SwapChainOutput,
         device: &wgpu::Device,
     ) -> Option<wgpu::CommandBuffer> {
-        None
+        self.triangle.as_ref().map(|triangle| {
+            let mut encoder =
+                device.create_command_encoder(&fine::graphic::wgpu::CommandEncoderDescriptor {
+                    label: None,
+                });
+
+            triangle.draw(&mut encoder, &frame.view);
+            encoder.finish()
+        })
     }
 }
 
 fn main() {
-    let scene = ArkanoidScene {};
+    let scene = ArkanoidScene { triangle: None };
     fine::start(scene, Default::default());
 }

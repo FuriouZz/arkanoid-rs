@@ -1,6 +1,5 @@
 use crate::event::Event;
 use crate::Window;
-use wasm_bindgen::describe::WasmDescribe;
 
 pub(crate) struct Context {
     pub(crate) window: Window,
@@ -11,7 +10,15 @@ pub(crate) struct Context {
 impl Context {
     pub(crate) fn init(&mut self) {
         self.window.ready();
-        self.scene.on_init(&self.window, &self.gpu.device);
+
+        let frame = self
+            .gpu
+            .swap_chain
+            .get_next_texture()
+            .expect("Timeout when acquiring next swap chain texture");
+
+        let command_buf = self.scene.on_init(&self.window, &frame, &self.gpu.device);
+        self.gpu.queue.submit(command_buf);
     }
 
     pub(crate) fn on_event(&mut self, e: Event) {
@@ -36,5 +43,6 @@ impl Context {
             }
             _ => {}
         }
+        self.scene.on_event(e);
     }
 }

@@ -1,3 +1,4 @@
+
 pub trait VertexAttributeDescriptor {
     /// The stride, in bytes, between elements of this buffer.
     const STRIDE: wgpu::BufferAddress;
@@ -5,24 +6,21 @@ pub trait VertexAttributeDescriptor {
     const ATTRIBUTES: &'static [wgpu::VertexAttributeDescriptor];
 }
 
-#[allow(dead_code)]
-pub mod defaults {
+pub mod position {
     use super::VertexAttributeDescriptor;
+    use bytemuck::{Pod, Zeroable};
 
-    pub struct Position {
-        position: (f32, f32, f32),
+    #[repr(C)]
+    #[derive(Clone, Copy, Debug)]
+    pub struct Vertex {
+        pub position: (f32, f32, f32)
     }
 
-    pub struct PositionTexCoord {
-        position_texcoord: (f32, f32, f32, f32, f32),
-    }
+    unsafe impl Pod for Vertex {}
+    unsafe impl Zeroable for Vertex {}
 
-    pub struct PositionTexCoordNormal {
-        position_texcoord_normal: (f32, f32, f32, f32, f32, f32, f32, f32),
-    }
-
-    impl VertexAttributeDescriptor for Position {
-        const STRIDE: wgpu::BufferAddress = std::mem::size_of::<Position>() as _;
+    impl VertexAttributeDescriptor for Vertex {
+        const STRIDE: wgpu::BufferAddress = std::mem::size_of::<Vertex>() as _;
         const ATTRIBUTES: &'static [wgpu::VertexAttributeDescriptor] =
             &[wgpu::VertexAttributeDescriptor {
                 format: wgpu::VertexFormat::Float3,
@@ -30,9 +28,24 @@ pub mod defaults {
                 shader_location: 0,
             }];
     }
+}
 
-    impl VertexAttributeDescriptor for PositionTexCoord {
-        const STRIDE: wgpu::BufferAddress = std::mem::size_of::<PositionTexCoord>() as _;
+pub mod position_texcoord {
+    use super::VertexAttributeDescriptor;
+    use bytemuck::{Pod, Zeroable};
+
+    #[repr(C)]
+    #[derive(Clone, Copy, Debug)]
+    pub struct Vertex {
+        pub position: (f32, f32, f32),
+        pub texcoord: (f32, f32)
+    }
+
+    unsafe impl Pod for Vertex {}
+    unsafe impl Zeroable for Vertex {}
+
+    impl VertexAttributeDescriptor for Vertex {
+        const STRIDE: wgpu::BufferAddress = std::mem::size_of::<Vertex>() as _;
         const ATTRIBUTES: &'static [wgpu::VertexAttributeDescriptor] = &[
             wgpu::VertexAttributeDescriptor {
                 format: wgpu::VertexFormat::Float3,
@@ -46,9 +59,25 @@ pub mod defaults {
             },
         ];
     }
+}
 
-    impl VertexAttributeDescriptor for PositionTexCoordNormal {
-        const STRIDE: wgpu::BufferAddress = std::mem::size_of::<PositionTexCoordNormal>() as _;
+pub mod position_texcoord_normal {
+    use super::VertexAttributeDescriptor;
+    use bytemuck::{Pod, Zeroable};
+
+    #[repr(C)]
+    #[derive(Clone, Copy, Debug)]
+    pub struct Vertex {
+        pub position: (f32, f32, f32),
+        pub texcoord: (f32, f32),
+        pub normal: (f32, f32, f32),
+    }
+
+    unsafe impl Pod for Vertex {}
+    unsafe impl Zeroable for Vertex {}
+
+    impl VertexAttributeDescriptor for Vertex {
+        const STRIDE: wgpu::BufferAddress = std::mem::size_of::<Vertex>() as _;
         const ATTRIBUTES: &'static [wgpu::VertexAttributeDescriptor] = &[
             wgpu::VertexAttributeDescriptor {
                 format: wgpu::VertexFormat::Float3,

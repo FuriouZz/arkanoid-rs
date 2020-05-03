@@ -17,7 +17,7 @@ impl Bridge {
         F: FnOnce() -> crate::context::Context,
     {
         let bridge = Bridge::get();
-        let mut handler = init();
+        let handler = init();
         bridge.handler = Some(handler);
         ffi::log("Bridge initialized 🔧");
         bridge.get_handler().init();
