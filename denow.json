@@ -4,7 +4,8 @@
     "public",
     "examples"
   ],
-  "ext": "html,ts,rs",
+  "ext": "html,ts,rs,vert,frag",
+  "skip": "d.ts",
   "execute": {
     "*.ts": [
       {
@@ -22,6 +23,18 @@
       {
         "env": {},
         "args": [ "wasm-bindgen", "--out-dir", "public/generated", "--web", "target/wasm32-unknown-unknown/debug/examples/arkanoid.wasm" ]
+      }
+    ],
+    "*.vert": [
+      {
+        "env": {},
+        "args": [ "glslc", "${dir}/${base}", "-o", "${dir}/${base}.spv" ]
+      }
+    ],
+    "*.frag": [
+      {
+        "env": {},
+        "args": [ "glslc", "${dir}/${base}", "-o", "${dir}/${base}.spv" ]
       }
     ]
   },

@@ -1,4 +1,4 @@
-import { walk,  } from "https://deno.land/std/fs/mod.ts";
+import { walk } from "https://deno.land/std/fs/mod.ts";
 import { globToRegExp, normalize } from "https://deno.land/std/path/mod.ts";
 
 async function read_text(path: string) {
