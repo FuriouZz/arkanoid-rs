@@ -42,12 +42,12 @@ fn create_triangle(device: &wgpu::Device) -> Triangle {
         bind_group_layouts: &[&bind_group_layout],
     });
 
-    let source = include_bytes!("./triangle.vert.spv");
+    let source = &include_bytes!("./triangle.vert.spv")[..];
     let vertex_module =
-        device.create_shader_module(&wgpu::read_spirv(std::io::Cursor::new(&source[..])).unwrap());
-    let source = include_bytes!("./triangle.frag.spv");
+        device.create_shader_module(&wgpu::read_spirv(std::io::Cursor::new(source)).unwrap());
+    let source = &include_bytes!("./triangle.frag.spv")[..];
     let fragment_module =
-        device.create_shader_module(&wgpu::read_spirv(std::io::Cursor::new(&source[..])).unwrap());
+        device.create_shader_module(&wgpu::read_spirv(std::io::Cursor::new(source)).unwrap());
 
     let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
         layout: &pipeline_layout,
