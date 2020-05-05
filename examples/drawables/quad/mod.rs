@@ -10,16 +10,16 @@ fn vertex(x: f32, y: f32, z: f32, u: f32, v: f32) -> Vertex {
 
 // Create texture from buffer
 fn create_texture(device: &wgpu::Device, encoder: &mut wgpu::CommandEncoder) -> wgpu::TextureView {
-    let brick = &include_bytes!("../../assets/brick2.png")[..];
-    let brick = std::io::Cursor::new(brick);
-    let d = png::Decoder::new(brick);
-    let (info, mut reader) = d.read_info().expect("cannot read info");
-    let png::OutputInfo { width, height, .. } = info;
-    let mut buf = vec![0; info.buffer_size()];
-    reader.next_frame(&mut buf).expect("cannot read png frame");
+    let bytes = &include_bytes!("../../assets//brick2.png")[..];
+    let img = image::load_from_memory(bytes)
+        .expect("cannot open image")
+        .to_rgba();
+
+    let width = img.width();
+    let height = img.height();
 
     // Create buffer, used for copy
-    let buffer = device.create_buffer_with_data(&buf, wgpu::BufferUsage::COPY_SRC);
+    let buffer = device.create_buffer_with_data(&img.into_raw()[..], wgpu::BufferUsage::COPY_SRC);
 
     // Create texture
     let texture = device.create_texture(&wgpu::TextureDescriptor {
