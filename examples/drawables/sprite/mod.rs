@@ -8,18 +8,96 @@ fn vertex(x: f32, y: f32, z: f32, u: f32, v: f32) -> Vertex {
     }
 }
 
+// Create texture from buffer
+fn create_texture(device: &wgpu::Device, encoder: &mut wgpu::CommandEncoder) -> wgpu::TextureView {
+    let bytes = &include_bytes!("../../assets//brick2.png")[..];
+    let img = image::load_from_memory(bytes)
+        .expect("cannot open image")
+        .to_rgba();
+
+    let width = img.width();
+    let height = img.height();
+
+    // Create buffer, used for copy
+    let buffer = device.create_buffer_with_data(&img.into_raw()[..], wgpu::BufferUsage::COPY_SRC);
+
+    // Create texture
+    let texture = device.create_texture(&wgpu::TextureDescriptor {
+        label: None,
+        size: wgpu::Extent3d {
+            width,
+            height,
+            depth: 1,
+        },
+        mip_level_count: 1,
+        sample_count: 1,
+        dimension: wgpu::TextureDimension::D2,
+        format: wgpu::TextureFormat::Rgba8Unorm,
+        usage: wgpu::TextureUsage::SAMPLED | wgpu::TextureUsage::COPY_DST,
+    });
+
+    // Copy buffer to texture
+    encoder.copy_buffer_to_texture(
+        wgpu::BufferCopyView {
+            buffer: &buffer,
+            offset: 0,
+            bytes_per_row: 4 * width,
+            rows_per_image: 0,
+        },
+        wgpu::TextureCopyView {
+            texture: &texture,
+            mip_level: 0,
+            array_layer: 0,
+            origin: wgpu::Origin3d::ZERO,
+        },
+        wgpu::Extent3d {
+            width,
+            height,
+            depth: 1,
+        },
+    );
+
+    // Create texture view
+    let texture_view = texture.create_view(&wgpu::TextureViewDescriptor {
+        format: wgpu::TextureFormat::Rgba8Unorm,
+        dimension: wgpu::TextureViewDimension::D2,
+        aspect: wgpu::TextureAspect::default(),
+        base_mip_level: 0,
+        level_count: 1,
+        base_array_layer: 0,
+        array_layer_count: 1,
+    });
+
+    texture_view
+}
+
 fn create_quad_pipeline(device: &wgpu::Device) -> (wgpu::RenderPipeline, fine::graphic::Binding) {
     let mut binding = fine::graphic::Binding::new();
-    binding.build(device, None);
+    binding
+        .entry(wgpu::BindGroupLayoutEntry {
+            binding: 0,
+            visibility: wgpu::ShaderStage::FRAGMENT,
+            ty: wgpu::BindingType::SampledTexture {
+                component_type: wgpu::TextureComponentType::Float,
+                dimension: wgpu::TextureViewDimension::D2,
+                multisampled: false,
+            },
+        })
+        .entry(wgpu::BindGroupLayoutEntry {
+            binding: 1,
+            visibility: wgpu::ShaderStage::FRAGMENT,
+            ty: wgpu::BindingType::Sampler { comparison: false },
+        })
+        .build(device, None);
 
     let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
         bind_group_layouts: &[binding.get_layout()],
     });
 
-    let source = &include_bytes!("./quad.vert.spv")[..];
+    let source = &include_bytes!("./sprite.vert.spv")[..];
     let vertex_module =
         device.create_shader_module(&wgpu::read_spirv(std::io::Cursor::new(source)).unwrap());
-    let source = &include_bytes!("./quad.frag.spv")[..];
+    let source = &include_bytes!("./sprite.frag.spv")[..];
     let fragment_module =
         device.create_shader_module(&wgpu::read_spirv(std::io::Cursor::new(source)).unwrap());
 
@@ -64,7 +142,7 @@ fn create_quad_pipeline(device: &wgpu::Device) -> (wgpu::RenderPipeline, fine::g
     (pipeline, binding)
 }
 
-fn create_quad(device: &wgpu::Device, encoder: &mut wgpu::CommandEncoder) -> Quad {
+fn create_sprite(device: &wgpu::Device, encoder: &mut wgpu::CommandEncoder) -> Sprite {
     let vertices: Vec<Vertex> = vec![
         vertex(-1.0, -1.0, 0., 0.0, 0.0),
         vertex(-1.0, 1.0, 0., 0.0, 1.0),
@@ -84,15 +162,44 @@ fn create_quad(device: &wgpu::Device, encoder: &mut wgpu::CommandEncoder) -> Qua
         wgpu::BufferUsage::INDEX,
     );
 
+    let sampler = device.create_sampler(&wgpu::SamplerDescriptor {
+        address_mode_u: wgpu::AddressMode::ClampToEdge,
+        address_mode_v: wgpu::AddressMode::ClampToEdge,
+        address_mode_w: wgpu::AddressMode::ClampToEdge,
+        mag_filter: wgpu::FilterMode::Nearest,
+        min_filter: wgpu::FilterMode::Linear,
+        mipmap_filter: wgpu::FilterMode::Nearest,
+        compare: wgpu::CompareFunction::Undefined,
+        lod_min_clamp: 0.,
+        lod_max_clamp: 100.,
+    });
+
+    let texture_view = create_texture(device, encoder);
+
     let (pipeline, binding) = create_quad_pipeline(device);
+
+    let resources = binding
+        .get_entries()
+        .filter_map(|b| match b.binding {
+            0 => Some(wgpu::Binding {
+                binding: 0,
+                resource: wgpu::BindingResource::TextureView(&texture_view),
+            }),
+            1 => Some(wgpu::Binding {
+                binding: 1,
+                resource: wgpu::BindingResource::Sampler(&sampler),
+            }),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
 
     let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
         label: None,
         layout: binding.get_layout(),
-        bindings: &[],
+        bindings: &resources,
     });
 
-    Quad {
+    Sprite {
         pipeline,
         vertex_buffer,
         index_buffer,
@@ -101,7 +208,7 @@ fn create_quad(device: &wgpu::Device, encoder: &mut wgpu::CommandEncoder) -> Qua
     }
 }
 
-pub struct Quad {
+pub struct Sprite {
     pipeline: wgpu::RenderPipeline,
     vertex_buffer: wgpu::Buffer,
     index_buffer: wgpu::Buffer,
@@ -109,9 +216,9 @@ pub struct Quad {
     bind_group: wgpu::BindGroup,
 }
 
-impl Quad {
+impl Sprite {
     pub fn new(device: &wgpu::Device, encoder: &mut wgpu::CommandEncoder) -> Self {
-        create_quad(device, encoder)
+        create_sprite(device, encoder)
     }
 
     pub fn draw(&self, encoder: &mut wgpu::CommandEncoder, view: &wgpu::TextureView) {

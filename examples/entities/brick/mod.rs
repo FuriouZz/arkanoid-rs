@@ -1,12 +1,12 @@
-use crate::drawables::Quad;
+use crate::drawables::Sprite;
 
 pub struct Brick {
-    quad: Option<Quad>,
+    sprite: Option<Sprite>,
 }
 
 impl Brick {
     pub fn new() -> Self {
-        Self { quad: None }
+        Self { sprite: None }
     }
 }
 
@@ -19,10 +19,10 @@ impl crate::drawables::Drawable for Brick {
         let mut encoder = device
             .create_command_encoder(&fine::graphic::wgpu::CommandEncoderDescriptor { label: None });
 
-        let quad = Quad::new(device, &mut encoder);
-        self.quad = Some(quad);
+        let quad = Sprite::new(device, &mut encoder);
+        self.sprite = Some(quad);
 
-        let quad = self.quad.as_ref().unwrap();
+        let quad = self.sprite.as_ref().unwrap();
         quad.draw(&mut encoder, &frame.view);
         Some(encoder.finish())
     }
@@ -32,7 +32,7 @@ impl crate::drawables::Drawable for Brick {
         device: &fine::graphic::wgpu::Device,
         frame: &fine::graphic::wgpu::SwapChainOutput,
     ) -> Option<fine::graphic::wgpu::CommandBuffer> {
-        self.quad.as_ref().map(|drawable| {
+        self.sprite.as_ref().map(|drawable| {
             let mut encoder =
                 device.create_command_encoder(&fine::graphic::wgpu::CommandEncoderDescriptor {
                     label: None,

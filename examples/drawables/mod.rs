@@ -2,6 +2,8 @@ mod triangle;
 pub use triangle::*;
 mod quad;
 pub use quad::*;
+mod sprite;
+pub use sprite::*;
 
 pub trait Drawable {
     fn create_pipeline(
