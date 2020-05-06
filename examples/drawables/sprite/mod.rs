@@ -1,5 +1,6 @@
 use fine::graphic::vertex_attribute::{position_texcoord::Vertex, VertexAttributeDescriptor};
 use fine::graphic::wgpu;
+use cgmath::{Matrix4, Vector3, prelude::SquareMatrix};
 
 fn vertex(x: f32, y: f32, z: f32, u: f32, v: f32) -> Vertex {
     Vertex {
@@ -88,6 +89,11 @@ fn create_quad_pipeline(device: &wgpu::Device) -> (wgpu::RenderPipeline, fine::g
             visibility: wgpu::ShaderStage::FRAGMENT,
             ty: wgpu::BindingType::Sampler { comparison: false },
         })
+        .entry(wgpu::BindGroupLayoutEntry {
+            binding: 2,
+            visibility: wgpu::ShaderStage::VERTEX | wgpu::ShaderStage::FRAGMENT,
+            ty: wgpu::BindingType::UniformBuffer { dynamic: false },
+        })
         .build(device, None);
 
     let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
@@ -162,6 +168,13 @@ fn create_sprite(device: &wgpu::Device, encoder: &mut wgpu::CommandEncoder) -> S
         wgpu::BufferUsage::INDEX,
     );
 
+    let mut transform = Matrix4::identity();
+    let transform_ref: &[f32; 16] = transform.as_ref();
+    let transform_buffer = device.create_buffer_with_data(
+        fine::bytemuck::cast_slice(transform_ref),
+        wgpu::BufferUsage::UNIFORM | wgpu::BufferUsage::COPY_DST,
+    );
+
     let sampler = device.create_sampler(&wgpu::SamplerDescriptor {
         address_mode_u: wgpu::AddressMode::ClampToEdge,
         address_mode_v: wgpu::AddressMode::ClampToEdge,
@@ -188,6 +201,14 @@ fn create_sprite(device: &wgpu::Device, encoder: &mut wgpu::CommandEncoder) -> S
             1 => Some(wgpu::Binding {
                 binding: 1,
                 resource: wgpu::BindingResource::Sampler(&sampler),
+            }),
+            2 => Some(wgpu::Binding {
+                binding: 2,
+                resource: wgpu::BindingResource::Buffer {
+                    buffer: &transform_buffer,
+                    // range: 0..64 // 16 value * 4. Same as:
+                    range: 0..std::mem::size_of::<Matrix4<f32>>() as wgpu::BufferAddress
+                }
             }),
             _ => None,
         })

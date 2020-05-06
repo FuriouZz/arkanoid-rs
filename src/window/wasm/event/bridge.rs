@@ -6,7 +6,6 @@ use wasm_bindgen::prelude::*;
 static mut BRIDGE: Option<Bridge> = None;
 static START_BRIDGE: Once = Once::new();
 
-#[wasm_bindgen]
 pub struct Bridge {
     handler: Option<crate::context::Context>,
 }
