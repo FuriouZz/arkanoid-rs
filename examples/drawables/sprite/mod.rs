@@ -123,28 +123,15 @@ fn create_sprite(gpu: &mut fine::graphic::Gpu) -> Sprite {
 
     let (pipeline, binding) = create_quad_pipeline(gpu);
 
-    let resources = binding
-        .get_entries()
-        .filter_map(|b| match b.binding {
-            0 => Some(wgpu::Binding {
-                binding: 0,
-                resource: wgpu::BindingResource::TextureView(&texture_view),
-            }),
-            1 => Some(wgpu::Binding {
-                binding: 1,
-                resource: wgpu::BindingResource::Sampler(&sampler),
-            }),
-            2 => Some(wgpu::Binding {
-                binding: 2,
-                resource: wgpu::BindingResource::Buffer {
-                    buffer: &transform_buffer,
-                    // range: 0..64 // 16 value * 4. Same as:
-                    range: 0..std::mem::size_of::<Matrix4<f32>>() as wgpu::BufferAddress,
-                },
-            }),
-            _ => None,
-        })
-        .collect::<Vec<_>>();
+    let resources = binding.bind(|b| match b.binding {
+        0 => Some(wgpu::BindingResource::TextureView(&texture_view)),
+        1 => Some(wgpu::BindingResource::Sampler(&sampler)),
+        2 => Some(wgpu::BindingResource::Buffer {
+            buffer: &transform_buffer,
+            range: 0..std::mem::size_of::<Matrix4<f32>>() as wgpu::BufferAddress,
+        }),
+        _ => None,
+    });
 
     let bind_group = gpu.device.create_bind_group(&wgpu::BindGroupDescriptor {
         label: None,

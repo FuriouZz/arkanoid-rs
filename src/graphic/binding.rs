@@ -18,7 +18,9 @@ impl Binding {
     }
 
     pub fn get_layout(&self) -> &wgpu::BindGroupLayout {
-        self.layout.as_ref().expect("[Binding] Layout not built yet.")
+        self.layout
+            .as_ref()
+            .expect("[Binding] Layout not built yet.")
     }
 
     pub fn build(&mut self, device: &wgpu::Device, label: Option<&str>) -> &mut Self {
@@ -30,7 +32,19 @@ impl Binding {
         self
     }
 
-    pub fn get_entries(&self) -> std::slice::Iter<wgpu::BindGroupLayoutEntry> {
-        self.entries.iter()
+    pub fn bind<'a, F>(&'a self, f: F) -> Vec<wgpu::Binding>
+    where
+        F: Fn(&wgpu::BindGroupLayoutEntry) -> Option<wgpu::BindingResource<'a>>,
+    {
+        self.entries
+            .iter()
+            .filter_map(|entry| match f(entry) {
+                Some(resource) => Some(wgpu::Binding {
+                    binding: entry.binding,
+                    resource,
+                }),
+                None => None,
+            })
+            .collect()
     }
 }
