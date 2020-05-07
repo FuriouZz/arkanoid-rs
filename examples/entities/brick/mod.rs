@@ -11,35 +11,15 @@ impl Brick {
 }
 
 impl crate::drawables::Drawable for Brick {
-    fn create_pipeline(
-        &mut self,
-        device: &fine::graphic::wgpu::Device,
-        frame: &fine::graphic::wgpu::SwapChainOutput,
-    ) -> Option<fine::graphic::wgpu::CommandBuffer> {
-        let mut encoder = device
-            .create_command_encoder(&fine::graphic::wgpu::CommandEncoderDescriptor { label: None });
-
-        let quad = Sprite::new(device, &mut encoder);
+    fn create_pipeline(&mut self, frame: &mut fine::Frame) {
+        let gpu = frame.gpu();
+        let quad = Sprite::new(gpu);
         self.sprite = Some(quad);
-
-        let quad = self.sprite.as_ref().unwrap();
-        quad.draw(&mut encoder, &frame.view);
-        Some(encoder.finish())
     }
 
-    fn render_pipeline(
-        &self,
-        device: &fine::graphic::wgpu::Device,
-        frame: &fine::graphic::wgpu::SwapChainOutput,
-    ) -> Option<fine::graphic::wgpu::CommandBuffer> {
+    fn render_pipeline(&self, frame: &mut fine::Frame) {
         self.sprite.as_ref().map(|drawable| {
-            let mut encoder =
-                device.create_command_encoder(&fine::graphic::wgpu::CommandEncoderDescriptor {
-                    label: None,
-                });
-
-            drawable.draw(&mut encoder, &frame.view);
-            encoder.finish()
-        })
+            drawable.draw(frame);
+        });
     }
 }

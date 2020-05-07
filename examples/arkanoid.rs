@@ -98,22 +98,13 @@ pub struct ArkanoidScene {
 }
 
 impl fine::Scene for ArkanoidScene {
-    fn on_init(
-        &mut self,
-        window: &fine::Window,
-        device: &wgpu::Device,
-        frame: &wgpu::SwapChainOutput,
-    ) -> Option<wgpu::CommandBuffer> {
+    fn on_init(&mut self, mut frame: fine::Frame) {
         fine::log!("Arkanoid initialized 🥰");
-        self.drawable.create_pipeline(device, frame)
+        self.drawable.create_pipeline(&mut frame);
     }
     fn on_event(&mut self, e: fine::event::Event) {}
-    fn on_draw(
-        &mut self,
-        device: &wgpu::Device,
-        frame: &wgpu::SwapChainOutput,
-    ) -> Option<wgpu::CommandBuffer> {
-        self.drawable.render_pipeline(device, frame)
+    fn on_draw(&mut self, mut frame: fine::Frame) {
+        self.drawable.render_pipeline(&mut frame);
     }
 }
 

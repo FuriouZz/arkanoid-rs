@@ -1,4 +1,5 @@
 {
   "deno.enable": true,
-  "rust-analyzer.cargo.defaultTarget": "wasm32-unknown-unknown"
+  "rust-analyzer.cargo.target": "wasm32-unknown-unknown",
+  "rust-analyzer.updates.channel": "nightly"
 }
