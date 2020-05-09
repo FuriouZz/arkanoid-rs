@@ -20,7 +20,7 @@ impl fine::Scene for QuadExample {
     where
         Self: Sized,
     {
-        fine::log!("Load quad 🚧");
+        fine::log!("🚧 QuadExample is loading");
 
         let gpu = frame.gpu();
 
@@ -106,7 +106,7 @@ impl fine::Scene for QuadExample {
     }
 
     fn on_start(&mut self, _frame: fine::Frame) {
-        fine::log!("Quad initialized 🥰");
+        fine::log!("QuadExample initialized 🥰");
     }
 
     fn on_draw(&mut self, mut frame: fine::Frame) {

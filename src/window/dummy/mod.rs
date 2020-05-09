@@ -5,9 +5,13 @@ impl Window {
         Self {}
     }
     pub fn ready(&self) {}
-    pub fn resize(&self, width: u32, height: u32) {}
-    pub fn width(&self) -> u32 {0}
-    pub fn height(&self) -> u32 {0}
+    pub fn resize(&self, _width: u32, _height: u32) {}
+    pub fn width(&self) -> u32 {
+        0
+    }
+    pub fn height(&self) -> u32 {
+        0
+    }
 }
 
 #[cfg(target_os = "macos")]
@@ -24,4 +28,12 @@ unsafe impl raw_window_handle::HasRawWindowHandle for Window {
 #[macro_export]
 macro_rules! log {
     ($($t:tt)*) => (println!($($t)*))
+}
+
+pub fn now() -> f64 {
+    0.
+}
+
+pub fn rand() -> f64 {
+    0.
 }

@@ -1,6 +1,6 @@
 use fine::graphic::vertex_attribute::{position_texcoord::Vertex, VertexAttributeDescriptor};
 use fine::graphic::wgpu;
-use fine::math::{Matrix4, Vector3};
+use fine::math::Matrix4;
 
 fn vertex(x: f32, y: f32, z: f32, u: f32, v: f32) -> Vertex {
     Vertex {
@@ -24,7 +24,7 @@ impl fine::Scene for BindingExample {
     where
         Self: Sized,
     {
-        fine::log!("Load quad 🚧");
+        fine::log!("🚧 BindingExample is loading");
 
         let gpu = frame.gpu();
 
@@ -140,16 +140,16 @@ impl fine::Scene for BindingExample {
     }
 
     fn on_start(&mut self, _frame: fine::Frame) {
-        fine::log!("Triangle initialized 🥰");
+        fine::log!("BindingExample initialized 🥰");
     }
 
     fn on_draw(&mut self, mut frame: fine::Frame) {
         let (gpu, view) = frame.target();
 
-        // Let's move to the right!
-        self.transform = self
-        .transform
-        .append_translation(&Vector3::new(0.001, 0., 0.));
+        // Let's move!
+        let time = (fine::now() * 0.001) as f32;
+        self.transform[12] = f32::cos(time);
+
         let copy = gpu.create_buffer(self.transform.as_slice(), wgpu::BufferUsage::COPY_SRC);
 
         // Commit transformation update to the encoder

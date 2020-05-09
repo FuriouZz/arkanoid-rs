@@ -9,7 +9,7 @@ impl fine::Scene for TriangleExample {
     where
         Self: Sized,
     {
-        fine::log!("Load triangle 🚧");
+        fine::log!("🚧 TriangleExample is loading");
 
         let gpu = frame.gpu();
 
@@ -82,7 +82,7 @@ impl fine::Scene for TriangleExample {
     }
 
     fn on_start(&mut self, _frame: fine::Frame) {
-        fine::log!("Triangle initialized 🥰");
+        fine::log!("TriangleExample initialized 🥰");
     }
 
     fn on_draw(&mut self, mut frame: fine::Frame) {

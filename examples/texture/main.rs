@@ -1,6 +1,6 @@
 use fine::graphic::vertex_attribute::{position_texcoord::Vertex, VertexAttributeDescriptor};
 use fine::graphic::wgpu;
-use fine::math::{Matrix4, Vector3};
+use fine::math::Matrix4;
 
 fn vertex(x: f32, y: f32, z: f32, u: f32, v: f32) -> Vertex {
     Vertex {
@@ -24,7 +24,7 @@ impl fine::Scene for TextureExample {
     where
         Self: Sized,
     {
-        fine::log!("Load quad 🚧");
+        fine::log!("🚧 TextureExample is loading");
 
         let gpu = frame.gpu();
 
@@ -50,7 +50,10 @@ impl fine::Scene for TextureExample {
         let transform = Matrix4::<f32>::identity();
         let transform_buffer = gpu.create_buffer(transform.as_slice(), wgpu::BufferUsage::COPY_DST | wgpu::BufferUsage::UNIFORM);
 
+        // To use a texture into our shader, we need to create a texture view and a sampler
+        // >> See Gpu::create_texture_view() for more details
         let texture_view = gpu.create_texture_view(&include_bytes!("../arkanoid/assets/brick2.png")[..]);
+        // Create a sampler
         let sampler = gpu.device.create_sampler(&wgpu::SamplerDescriptor {
             address_mode_u: wgpu::AddressMode::ClampToEdge,
             address_mode_v: wgpu::AddressMode::ClampToEdge,
@@ -69,11 +72,13 @@ impl fine::Scene for TextureExample {
                 visibility: wgpu::ShaderStage::VERTEX,
                 ty: wgpu::BindingType::UniformBuffer { dynamic: false },
             })
+            // Add sampler binding
             .entry(wgpu::BindGroupLayoutEntry {
                 binding: 1,
                 visibility: wgpu::ShaderStage::FRAGMENT,
                 ty: wgpu::BindingType::Sampler { comparison: false },
             })
+            // Add texture binding
             .entry(wgpu::BindGroupLayoutEntry {
                 binding: 2,
                 visibility: wgpu::ShaderStage::FRAGMENT,
@@ -85,12 +90,15 @@ impl fine::Scene for TextureExample {
             })
             .build(&gpu.device);
 
+        // >> Another suger things from my framework
         let resources = binding.bind(|b| match b.binding {
             0 => Some(wgpu::BindingResource::Buffer {
                 buffer: &transform_buffer,
                 range: 0..std::mem::size_of::<Matrix4<f32>>() as wgpu::BufferAddress,
             }),
+            // Assign sampler
             1 => Some(wgpu::BindingResource::Sampler(&sampler)),
+            // Assign texture view
             2 => Some(wgpu::BindingResource::TextureView(&texture_view)),
             _ => None
         });
@@ -162,15 +170,14 @@ impl fine::Scene for TextureExample {
     }
 
     fn on_start(&mut self, _frame: fine::Frame) {
-        fine::log!("Triangle initialized 🥰");
+        fine::log!("TextureExample initialized 🥰");
     }
 
     fn on_draw(&mut self, mut frame: fine::Frame) {
         let (gpu, view) = frame.target();
 
-        self.transform = self
-        .transform
-        .append_translation(&Vector3::new(0.001, 0., 0.));
+        let time = (fine::now() * 0.001) as f32;
+        self.transform[12] = f32::cos(time);
         let copy = gpu.create_buffer(self.transform.as_slice(), wgpu::BufferUsage::COPY_SRC);
 
         let encoder = &mut gpu.encoder;
