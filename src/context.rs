@@ -10,11 +10,11 @@ impl Context {
     pub(crate) fn init(&mut self) {
         self.surface.window.ready();
 
-        let frame = crate::Frame {
+        self.scene.on_start(super::Frame {
             gpu: &mut self.gpu,
             surface: &mut self.surface,
-        };
-        self.scene.on_init(frame);
+        });
+
         self.surface.submit(&mut self.gpu);
     }
 
@@ -24,11 +24,10 @@ impl Context {
                 self.surface.resize(&self.gpu, width, height);
             }
             Event::Frame => {
-                let frame = crate::Frame {
+                self.scene.on_draw(super::Frame {
                     gpu: &mut self.gpu,
                     surface: &mut self.surface,
-                };
-                self.scene.on_draw(frame);
+                });
                 self.surface.submit(&mut self.gpu);
             }
             _ => {}

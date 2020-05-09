@@ -16,7 +16,7 @@ impl<'a> Frame<'a> {
         self.gpu
     }
 
-    pub fn target(&mut self) -> (&mut wgpu::CommandEncoder, &wgpu::TextureView) {
-        (&mut self.gpu.encoder, self.surface.frame())
+    pub fn target(&mut self) -> (&mut crate::graphic::Gpu, &wgpu::TextureView) {
+        (&mut self.gpu, self.surface.frame())
     }
 }

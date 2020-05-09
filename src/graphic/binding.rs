@@ -1,37 +1,53 @@
-pub struct Binding {
-    entries: Vec<wgpu::BindGroupLayoutEntry>,
-    layout: Option<wgpu::BindGroupLayout>,
-}
+pub struct BindingDescriptor(Vec<wgpu::BindGroupLayoutEntry>);
 
-impl Binding {
+impl BindingDescriptor {
     pub fn new() -> Self {
-        Self {
-            entries: Vec::new(),
-            layout: None,
-        }
+        Self(Vec::new())
+    }
+
+    pub fn from_entry(entry: wgpu::BindGroupLayoutEntry) -> Self {
+        Self::new().entry(entry)
+    }
+
+    pub fn from_entries(entries: &[wgpu::BindGroupLayoutEntry]) -> Self {
+        let mut binding = Self::new();
+        binding.0.extend_from_slice(entries);
+        binding
     }
 
     /// A description of a single binding inside a bind group.
-    pub fn entry(&mut self, entry: wgpu::BindGroupLayoutEntry) -> &mut Self {
-        self.entries.push(entry);
+    pub fn entry(mut self, entry: wgpu::BindGroupLayoutEntry) -> Self {
+        self.0.push(entry);
         self
     }
 
-    pub fn get_layout(&self) -> &wgpu::BindGroupLayout {
-        self.layout
-            .as_ref()
-            .expect("[Binding] Layout not built yet.")
-    }
-
-    pub fn build(&mut self, device: &wgpu::Device, label: Option<&str>) -> &mut Self {
+    /// Build bind group layout
+    pub fn build(self, device: &wgpu::Device) -> BindingLayout {
         let layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label,
-            bindings: self.entries.as_slice(),
+            label: Some("[fine] bind group layout"),
+            bindings: self.0.as_slice(),
         });
-        self.layout = Some(layout);
-        self
+
+        BindingLayout {
+            entries: self.0,
+            layout
+        }
+    }
+}
+
+pub struct BindingLayout {
+    entries: Vec<wgpu::BindGroupLayoutEntry>,
+    layout: wgpu::BindGroupLayout
+}
+
+impl BindingLayout {
+
+    /// Return bind group layout
+    pub fn get_layout(&self) -> &wgpu::BindGroupLayout {
+        &self.layout
     }
 
+    /// Bind resources to entries
     pub fn bind<'a, F>(&'a self, f: F) -> Vec<wgpu::Binding>
     where
         F: Fn(&wgpu::BindGroupLayoutEntry) -> Option<wgpu::BindingResource<'a>>,
@@ -47,4 +63,5 @@ impl Binding {
             })
             .collect()
     }
+
 }

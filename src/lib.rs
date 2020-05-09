@@ -10,7 +10,7 @@ pub use window::*;
 mod frame;
 pub use frame::*;
 
-async fn start_async<S: 'static + Scene>(scene: S, graphic_options: graphic::GpuOptions) {
+async fn start_async<S: 'static + Scene>(graphic_options: graphic::GpuOptions) {
     #[cfg(target_arch = "wasm32")]
     {
         std::panic::set_hook(Box::new(|info| {
@@ -21,9 +21,16 @@ async fn start_async<S: 'static + Scene>(scene: S, graphic_options: graphic::Gpu
 
     let window = crate::Window::new();
 
-    let (gpu, surface) = graphic::create_gpu_surface(window, &graphic_options)
+    let (mut gpu, mut surface) = graphic::gpu::create(window, &graphic_options)
         .await
         .expect("Cannot initialize Gpu.");
+
+    let scene = S::on_load(Frame {
+        gpu: &mut gpu,
+        surface: &mut surface,
+    });
+
+    surface.submit(&mut gpu);
 
     let context = context::Context {
         scene: Box::new(scene),
@@ -37,9 +44,9 @@ async fn start_async<S: 'static + Scene>(scene: S, graphic_options: graphic::Gpu
     }
 }
 
-pub fn start<S: 'static + Scene>(scene: S, graphic_options: graphic::GpuOptions) {
+pub fn start<S: 'static + Scene>(graphic_options: graphic::GpuOptions) {
     #[cfg(target_arch = "wasm32")]
     {
-        wasm_bindgen_futures::spawn_local(start_async::<S>(scene, graphic_options));
+        wasm_bindgen_futures::spawn_local(start_async::<S>(graphic_options));
     }
 }
