@@ -98,9 +98,16 @@ pub struct ArkanoidScene {
 }
 
 impl fine::Scene for ArkanoidScene {
-    fn on_init(&mut self, mut frame: fine::Frame) {
+    fn on_load(mut frame: fine::Frame) -> Self
+    where Self: Sized {
+        let gpu = frame.gpu();
+        Self {
+            drawable: entities::Brick::new(gpu),
+        }
+    }
+
+    fn on_start(&mut self, _frame: fine::Frame) {
         fine::log!("Arkanoid initialized 🥰");
-        self.drawable.create_pipeline(&mut frame);
     }
     fn on_event(&mut self, e: fine::event::Event) {}
     fn on_draw(&mut self, mut frame: fine::Frame) {
@@ -109,8 +116,5 @@ impl fine::Scene for ArkanoidScene {
 }
 
 fn main() {
-    let scene = ArkanoidScene {
-        drawable: entities::Brick::new(),
-    };
-    fine::start(scene, Default::default());
+    fine::start::<ArkanoidScene>(Default::default());
 }
