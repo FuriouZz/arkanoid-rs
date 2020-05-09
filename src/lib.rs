@@ -5,10 +5,10 @@ pub mod math;
 mod scene;
 mod window;
 pub use bytemuck;
-pub use scene::*;
+pub use scene::Scene;
 pub use window::*;
 mod frame;
-pub use frame::*;
+pub use frame::Frame;
 
 async fn start_async<S: 'static + Scene>(graphic_options: graphic::GpuOptions) {
     #[cfg(target_arch = "wasm32")]

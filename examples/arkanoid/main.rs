@@ -1,6 +1,8 @@
-mod drawables;
+mod camera;
+mod pipelines;
 mod entities;
-use drawables::Drawable;
+use camera::{Camera, Lens};
+use pipelines::Sprite;
 
 // use std::collections::HashSet;
 
@@ -94,24 +96,50 @@ use drawables::Drawable;
 // }
 
 pub struct ArkanoidScene {
-    drawable: entities::Brick,
+    camera: Camera,
+    sprite: Sprite,
+    brick: entities::Brick,
 }
 
 impl fine::Scene for ArkanoidScene {
     fn on_load(mut frame: fine::Frame) -> Self
-    where Self: Sized {
+    where
+        Self: Sized,
+    {
         let gpu = frame.gpu();
+        let sprite = Sprite::new(gpu);
+        let brick = entities::Brick::new(gpu, &sprite);
+
         Self {
-            drawable: entities::Brick::new(gpu),
+            brick,
+            sprite,
+            camera: Camera::orthographic(-1.0, 1.0, -1.0, 1.0, -100.0, 100.0),
         }
     }
 
     fn on_start(&mut self, _frame: fine::Frame) {
         fine::log!("Arkanoid initialized 🥰");
     }
-    fn on_event(&mut self, e: fine::event::Event) {}
+    fn on_event(&mut self, e: fine::event::Event) {
+        match e {
+            fine::event::Event::Resize(width, height) => {
+                let right = (width as f32) * 0.5;
+                let top = (height as f32) * 0.5;
+                let lens = &mut self.camera.lens;
+                match lens {
+                    Lens::Orthographic(o) => {
+                        o.set_left_and_right(-right, right);
+                        o.set_bottom_and_top(-top, top);
+                    }
+                    _ => {}
+                }
+            }
+            _ => {}
+        }
+    }
     fn on_draw(&mut self, mut frame: fine::Frame) {
-        self.drawable.render_pipeline(&mut frame);
+        let (transform, texture) = self.brick.update(&self.camera);
+        self.sprite.draw(&mut frame, texture, &transform);
     }
 }
 

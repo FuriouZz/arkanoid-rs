@@ -8,14 +8,13 @@ pub(crate) struct Context {
 
 impl Context {
     pub(crate) fn init(&mut self) {
-        self.surface.window.ready();
-
         self.scene.on_start(super::Frame {
             gpu: &mut self.gpu,
             surface: &mut self.surface,
         });
 
         self.surface.submit(&mut self.gpu);
+        self.surface.window.ready();
     }
 
     pub(crate) fn on_event(&mut self, e: Event) {

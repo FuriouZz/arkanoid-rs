@@ -11,7 +11,8 @@ pub struct Surface {
 impl Surface {
     pub fn frame(&mut self) -> &wgpu::TextureView {
         if self.output.is_none() {
-            let frame = self.swap_chain
+            let frame = self
+                .swap_chain
                 .get_next_texture()
                 .expect("Timeout when acquiring next swap chain texture");
             self.output = Some(frame);
@@ -30,7 +31,9 @@ impl Surface {
     }
 
     pub fn submit(&mut self, gpu: &mut Gpu) {
-        let encoder = gpu.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        let encoder = gpu
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
         let current = std::mem::replace(&mut gpu.encoder, encoder);
         gpu.queue.submit(Some(current.finish()));
         self.output = None;

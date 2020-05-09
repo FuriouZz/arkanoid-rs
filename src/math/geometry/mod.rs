@@ -5,9 +5,9 @@ mod rect;
 mod size;
 mod vec2;
 
-pub use circle::*;
+pub use circle::Circle;
 pub use intersection::*;
-pub use line::*;
-pub use rect::*;
-pub use size::*;
-pub use vec2::*;
+pub use line::Line;
+pub use rect::Rect;
+pub use size::Size;
+pub use vec2::Vec2;
