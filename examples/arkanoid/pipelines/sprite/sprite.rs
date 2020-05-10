@@ -4,13 +4,14 @@ use fine::math::{Matrix4, Vector3};
 pub struct Sprite {
     bind_group: wgpu::BindGroup,
     buffer: wgpu::Buffer,
-    texture: Texture2D,
+    texture_width: u32,
+    texture_height: u32,
     origin: Matrix4<f32>,
     transform: Matrix4<f32>,
 }
 
 impl Sprite {
-    pub fn new(gpu: &Gpu, layout: &wgpu::BindGroupLayout, texture: Texture2D) -> Self {
+    pub fn new(gpu: &Gpu, layout: &wgpu::BindGroupLayout, texture: &Texture2D) -> Self {
         let transform_buffer = gpu.device.create_buffer(&wgpu::BufferDescriptor {
             usage: wgpu::BufferUsage::COPY_DST | wgpu::BufferUsage::UNIFORM,
             size: std::mem::size_of::<Matrix4<f32>>() as wgpu::BufferAddress,
@@ -44,15 +45,16 @@ impl Sprite {
         Self {
             bind_group,
             buffer: transform_buffer,
-            texture,
+            texture_width: texture.width(),
+            texture_height: texture.height(),
             origin,
             transform: Matrix4::identity(),
         }
     }
 
     pub fn set_origin(&mut self, x: f32, y: f32) {
-        let x = -x * self.texture.width() as f32;
-        let y = -y * self.texture.height() as f32;
+        let x = -x * self.texture_width as f32;
+        let y = -y * self.texture_height as f32;
         self.origin[12] = x;
         self.origin[13] = y;
     }
@@ -71,11 +73,11 @@ impl Sprite {
     }
 
     pub fn width(&self) -> f32 {
-        self.texture.width() as f32
+        self.texture_width as f32
     }
 
     pub fn height(&self) -> f32 {
-        self.texture.height() as f32
+        self.texture_height as f32
     }
 
     pub(super) fn get_bind_group(&self) -> &wgpu::BindGroup {

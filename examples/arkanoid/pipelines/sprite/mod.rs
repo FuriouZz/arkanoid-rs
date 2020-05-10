@@ -145,7 +145,7 @@ impl SpritePipeline {
         }
     }
 
-    pub fn create_sprite(&self, gpu: &graphic::Gpu, texture: graphic::Texture2D) -> Sprite {
+    pub fn create_sprite(&self, gpu: &graphic::Gpu, texture: &graphic::Texture2D) -> Sprite {
         Sprite::new(gpu, self.instance_layout.get_layout(), texture)
     }
 

@@ -6,9 +6,8 @@ pub struct Brick {
 }
 
 impl Brick {
-    pub fn new(gpu: &mut fine::graphic::Gpu, pipeline: &SpritePipeline) -> Self {
-        let view = Texture2D::from_image(gpu, &include_bytes!("../assets/brick2.png")[..]);
-        let sprite = pipeline.create_sprite(gpu, view);
+    pub fn new(gpu: &mut fine::graphic::Gpu, pipeline: &SpritePipeline, texture: &Texture2D) -> Self {
+        let sprite = pipeline.create_sprite(gpu, texture);
 
         Self { sprite }
     }
