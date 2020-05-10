@@ -13,9 +13,9 @@ impl Level {
                 let x = (index % width) as f32;
                 let y = f32::floor((index as f32) / (height as f32));
                 let mut brick = Brick::new(gpu, sprite);
-                brick.set_position(
-                    x * brick.sprite.texture.width() as f32,
-                    y * brick.sprite.texture.height() as f32,
+                brick.sprite.set_position(
+                    x * brick.sprite.width() as f32,
+                    y * brick.sprite.height() as f32,
                 );
                 brick
             })

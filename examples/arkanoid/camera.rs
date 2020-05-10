@@ -31,6 +31,10 @@ impl Camera {
         self.lens.get_projection()
     }
 
+    pub fn get_view_projection(&self) -> Matrix4<f32> {
+        self.lens.get_projection() * self.view
+    }
+
     pub fn model_view(&self, model: &Matrix4<f32>) -> Matrix4<f32> {
         self.view * model
     }

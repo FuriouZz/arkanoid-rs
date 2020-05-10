@@ -8,7 +8,7 @@ pub(crate) struct Context {
 
 impl Context {
     pub(crate) fn init(&mut self) {
-        self.scene.on_start(super::Frame {
+        self.scene.on_start(&mut super::Frame {
             gpu: &mut self.gpu,
             surface: &mut self.surface,
         });
@@ -23,7 +23,7 @@ impl Context {
                 self.surface.resize(&self.gpu, width, height);
             }
             Event::Frame => {
-                self.scene.on_draw(super::Frame {
+                self.scene.on_draw(&mut super::Frame {
                     gpu: &mut self.gpu,
                     surface: &mut self.surface,
                 });

@@ -174,11 +174,11 @@ impl fine::Scene for TextureExample {
         }
     }
 
-    fn on_start(&mut self, _frame: fine::Frame) {
+    fn on_start(&mut self, _frame: &mut fine::Frame) {
         fine::log!("TextureExample initialized 🥰");
     }
 
-    fn on_draw(&mut self, mut frame: fine::Frame) {
+    fn on_draw(&mut self, frame: &mut fine::Frame) {
         let (gpu, view) = frame.target();
 
         let time = (fine::now() * 0.001) as f32;

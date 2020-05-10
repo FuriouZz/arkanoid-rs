@@ -81,11 +81,11 @@ impl fine::Scene for TriangleExample {
         Self { pipeline }
     }
 
-    fn on_start(&mut self, _frame: fine::Frame) {
+    fn on_start(&mut self, _frame: &mut fine::Frame) {
         fine::log!("TriangleExample initialized 🥰");
     }
 
-    fn on_draw(&mut self, mut frame: fine::Frame) {
+    fn on_draw(&mut self, frame: &mut fine::Frame) {
         let (gpu, view) = frame.target();
         let encoder = &mut gpu.encoder;
 

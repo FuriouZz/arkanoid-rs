@@ -1,9 +1,8 @@
 use fine::graphic;
 use fine::graphic::vertex_attribute::{position_texcoord::Vertex, VertexAttributeDescriptor};
 use fine::graphic::wgpu;
-use fine::math::Matrix4;
-mod instance;
-pub use instance::SpriteInstance;
+mod sprite;
+pub use sprite::Sprite;
 
 fn vertex(x: f32, y: f32, z: f32, u: f32, v: f32) -> Vertex {
     Vertex {
@@ -27,10 +26,10 @@ pub struct SpritePipeline {
 impl SpritePipeline {
     pub fn new(gpu: &mut graphic::Gpu) -> Self {
         let vertices: Vec<Vertex> = vec![
-            vertex(-0.5, -0.5, 0., 0.0, 0.0),
-            vertex(-0.5, 0.5, 0., 0.0, 1.0),
-            vertex(0.5, 0.5, 0., 1.0, 1.0),
-            vertex(0.5, -0.5, 0., 1.0, 0.0),
+            vertex(0.0, 0.0, 0., 0.0, 0.0),
+            vertex(0.0, 1.0, 0., 0.0, 1.0),
+            vertex(1.0, 1.0, 0., 1.0, 1.0),
+            vertex(1.0, 0.0, 0., 1.0, 0.0),
         ];
 
         let indices: Vec<u16> = vec![0, 1, 2, 0, 2, 3];
@@ -146,38 +145,17 @@ impl SpritePipeline {
         }
     }
 
-    pub fn create_sprite_instance(
-        &self,
-        gpu: &mut graphic::Gpu,
-        texture: graphic::Texture2D,
-    ) -> SpriteInstance {
-        let transform_buffer = gpu.device.create_buffer(&wgpu::BufferDescriptor {
-            usage: wgpu::BufferUsage::COPY_DST | wgpu::BufferUsage::UNIFORM,
-            size: std::mem::size_of::<Matrix4<f32>>() as wgpu::BufferAddress,
-            label: None,
-        });
-        let bind_group = gpu.device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: None,
-            layout: self.instance_layout.get_layout(),
-            bindings: &[
-                wgpu::Binding {
-                    binding: 0,
-                    resource: wgpu::BindingResource::TextureView(texture.view()),
-                },
-                wgpu::Binding {
-                    binding: 1,
-                    resource: wgpu::BindingResource::Buffer {
-                        buffer: &transform_buffer,
-                        range: 0..std::mem::size_of::<Matrix4<f32>>() as wgpu::BufferAddress,
-                    },
-                },
-            ],
-        });
-        SpriteInstance::new(bind_group, transform_buffer, texture)
+    pub fn create_sprite(&self, gpu: &graphic::Gpu, texture: graphic::Texture2D) -> Sprite {
+        Sprite::new(gpu, self.instance_layout.get_layout(), texture)
     }
 
-    pub fn draw(&mut self, frame: &mut fine::Frame, instances: &[&SpriteInstance]) {
+    pub fn draw(&mut self, frame: &mut fine::Frame, camera: &crate::camera::Camera, instances: &[&Sprite]) {
         let (gpu, attachment) = frame.target();
+
+        for instance in instances {
+            instance.update_buffer(gpu, &camera.get_view_projection());
+        }
+
         let encoder = &mut gpu.encoder;
 
         let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {

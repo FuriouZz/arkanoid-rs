@@ -142,11 +142,11 @@ impl fine::Scene for BindingExample {
         }
     }
 
-    fn on_start(&mut self, _frame: fine::Frame) {
+    fn on_start(&mut self, _frame: &mut fine::Frame) {
         fine::log!("BindingExample initialized 🥰");
     }
 
-    fn on_draw(&mut self, mut frame: fine::Frame) {
+    fn on_draw(&mut self, frame: &mut fine::Frame) {
         let (gpu, view) = frame.target();
 
         // Let's move!

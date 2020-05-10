@@ -2,7 +2,7 @@ mod camera;
 mod entities;
 mod pipelines;
 use camera::{Camera, Lens};
-use pipelines::{SpriteInstance, SpritePipeline};
+use pipelines::{Sprite, SpritePipeline};
 
 pub struct ArkanoidScene {
     camera: Camera,
@@ -26,7 +26,7 @@ impl fine::Scene for ArkanoidScene {
         }
     }
 
-    fn on_start(&mut self, _frame: fine::Frame) {
+    fn on_start(&mut self, _frame: &mut fine::Frame) {
         fine::log!("Arkanoid initialized 🥰");
     }
     fn on_event(&mut self, e: fine::event::Event) {
@@ -47,16 +47,14 @@ impl fine::Scene for ArkanoidScene {
             _ => {}
         }
     }
-    fn on_draw(&mut self, mut frame: fine::Frame) {
-        let frame = &mut frame; // Shadowing frame
-        let camera = &self.camera;
-        let instances: Vec<&SpriteInstance> = self
+    fn on_draw(&mut self, frame: &mut fine::Frame) {
+        let instances: Vec<&Sprite> = self
             .level
             .bricks
             .iter_mut()
-            .map(|brick| brick.update(frame, camera))
+            .map(|brick| &brick.sprite)
             .collect();
-        self.sprite.draw(frame, instances.as_slice());
+        self.sprite.draw(frame, &self.camera, instances.as_slice());
     }
 }
 

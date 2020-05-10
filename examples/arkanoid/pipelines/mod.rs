@@ -1,3 +1,3 @@
 mod sprite;
-pub use sprite::SpriteInstance;
+pub use sprite::Sprite;
 pub use sprite::SpritePipeline;
