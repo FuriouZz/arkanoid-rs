@@ -2,11 +2,11 @@ mod camera;
 mod entities;
 mod pipelines;
 use camera::{Camera, Lens};
-use pipelines::{Sprite, SpriteInstance};
+use pipelines::{SpritePipeline, SpriteInstance};
 
 pub struct ArkanoidScene {
     camera: Camera,
-    sprite: Sprite,
+    sprite: SpritePipeline,
     level: entities::Level,
 }
 
@@ -16,7 +16,7 @@ impl fine::Scene for ArkanoidScene {
         Self: Sized,
     {
         let gpu = frame.gpu();
-        let sprite = Sprite::new(gpu);
+        let sprite = SpritePipeline::new(gpu);
         let level = entities::Level::generate(2, 2, gpu, &sprite);
 
         Self {

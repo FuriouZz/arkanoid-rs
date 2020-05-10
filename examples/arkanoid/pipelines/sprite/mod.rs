@@ -1,7 +1,9 @@
 use fine::graphic;
 use fine::graphic::vertex_attribute::{position_texcoord::Vertex, VertexAttributeDescriptor};
 use fine::graphic::wgpu;
-use fine::math::{Matrix4, Vector3};
+use fine::math::Matrix4;
+mod instance;
+pub use instance::SpriteInstance;
 
 fn vertex(x: f32, y: f32, z: f32, u: f32, v: f32) -> Vertex {
     Vertex {
@@ -10,7 +12,7 @@ fn vertex(x: f32, y: f32, z: f32, u: f32, v: f32) -> Vertex {
     }
 }
 
-pub struct Sprite {
+pub struct SpritePipeline {
     // Geometry
     vertex_buffer: wgpu::Buffer,
     index_buffer: wgpu::Buffer,
@@ -22,7 +24,7 @@ pub struct Sprite {
     instance_layout: graphic::BindingLayout,
 }
 
-impl Sprite {
+impl SpritePipeline {
     pub fn new(gpu: &mut graphic::Gpu) -> Self {
         let vertices: Vec<Vertex> = vec![
             vertex(-1.0, -1.0, 0., 0.0, 0.0),
@@ -127,7 +129,7 @@ impl Sprite {
             layout: constant_binding.get_layout(),
             bindings: &[wgpu::Binding {
                 binding: 0,
-                resource: wgpu::BindingResource::Sampler(&sampler)
+                resource: wgpu::BindingResource::Sampler(&sampler),
             }],
         });
 
@@ -171,11 +173,7 @@ impl Sprite {
                 },
             ],
         });
-        SpriteInstance {
-            bind_group,
-            transform: transform_buffer,
-            texture,
-        }
+        SpriteInstance::new(bind_group, transform_buffer, texture)
     }
 
     pub fn draw(&mut self, frame: &mut fine::Frame, instances: &[&SpriteInstance]) {
@@ -204,40 +202,8 @@ impl Sprite {
         pass.set_vertex_buffer(0, &self.vertex_buffer, 0, 0);
 
         for instance in instances {
-            pass.set_bind_group(1, &instance.bind_group, &[]);
+            pass.set_bind_group(1, &instance.get_bind_group(), &[]);
             pass.draw_indexed(0..self.index_count, 0, 0..1);
         }
-    }
-}
-
-pub struct SpriteInstance {
-    bind_group: wgpu::BindGroup,
-    transform: wgpu::Buffer,
-    pub texture: fine::graphic::Texture2D,
-}
-
-impl SpriteInstance {
-    pub fn update_transform(&mut self, gpu: &mut graphic::Gpu, transform: &Matrix4<f32>) {
-        let mut t = Matrix4::<f32>::identity();
-
-        // Apply texture size
-        t.copy_from(transform);
-        t.append_nonuniform_scaling_mut(&Vector3::new(
-            self.texture.width() as f32,
-            self.texture.height() as f32,
-            1.0,
-        ));
-
-        // Update transform
-        let transform_buffer = gpu.create_buffer(t.as_slice(), wgpu::BufferUsage::COPY_SRC);
-
-        let encoder = &mut gpu.encoder;
-        encoder.copy_buffer_to_buffer(
-            &transform_buffer,
-            0,
-            &self.transform,
-            0,
-            std::mem::size_of::<Matrix4<f32>>() as wgpu::BufferAddress,
-        );
     }
 }
