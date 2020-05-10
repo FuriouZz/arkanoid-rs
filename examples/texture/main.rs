@@ -48,11 +48,15 @@ impl fine::Scene for TextureExample {
         );
 
         let transform = Matrix4::<f32>::identity();
-        let transform_buffer = gpu.create_buffer(transform.as_slice(), wgpu::BufferUsage::COPY_DST | wgpu::BufferUsage::UNIFORM);
+        let transform_buffer = gpu.create_buffer(
+            transform.as_slice(),
+            wgpu::BufferUsage::COPY_DST | wgpu::BufferUsage::UNIFORM,
+        );
 
         // To use a texture into our shader, we need to create a texture view and a sampler
         // >> See fine::graphic::Texture2D::from_image_data() for more details
-        let texture = Texture2D::from_image_data(&include_bytes!("../arkanoid/assets/brick2.png")[..], gpu);
+        let texture =
+            Texture2D::from_image_data(&include_bytes!("../arkanoid/assets/brick2.png")[..], gpu);
 
         // Create a sampler
         let sampler = gpu.device.create_sampler(&wgpu::SamplerDescriptor {
@@ -101,7 +105,7 @@ impl fine::Scene for TextureExample {
             1 => Some(wgpu::BindingResource::Sampler(&sampler)),
             // Assign texture view
             2 => Some(wgpu::BindingResource::TextureView(texture.view())),
-            _ => None
+            _ => None,
         });
 
         let bind_group = gpu.device.create_bind_group(&wgpu::BindGroupDescriptor {

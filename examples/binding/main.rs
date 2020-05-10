@@ -49,7 +49,10 @@ impl fine::Scene for BindingExample {
 
         // Create a buffer from Matrix4<f32>
         let transform = Matrix4::<f32>::identity();
-        let transform_buffer = gpu.create_buffer(transform.as_slice(), wgpu::BufferUsage::COPY_DST | wgpu::BufferUsage::UNIFORM);
+        let transform_buffer = gpu.create_buffer(
+            transform.as_slice(),
+            wgpu::BufferUsage::COPY_DST | wgpu::BufferUsage::UNIFORM,
+        );
 
         // Describe bind group with a layout
         let transform_binding = fine::graphic::BindingDescriptor::new()

@@ -30,18 +30,17 @@ impl BindingDescriptor {
 
         BindingLayout {
             entries: self.0,
-            layout
+            layout,
         }
     }
 }
 
 pub struct BindingLayout {
     entries: Vec<wgpu::BindGroupLayoutEntry>,
-    layout: wgpu::BindGroupLayout
+    layout: wgpu::BindGroupLayout,
 }
 
 impl BindingLayout {
-
     /// Return bind group layout
     pub fn get_layout(&self) -> &wgpu::BindGroupLayout {
         &self.layout
@@ -63,5 +62,4 @@ impl BindingLayout {
             })
             .collect()
     }
-
 }

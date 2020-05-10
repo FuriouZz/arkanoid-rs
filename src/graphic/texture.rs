@@ -7,7 +7,8 @@ pub struct Texture2D {
 impl Texture2D {
     pub fn from_image_data(buffer: &[u8], gpu: &mut super::Gpu) -> Self {
         let img = image::load_from_memory(buffer)
-            .expect("cannot open image").to_rgba();
+            .expect("cannot open image")
+            .to_rgba();
         let width = img.width();
         let height = img.height();
 
