@@ -1,4 +1,4 @@
-use fine::graphic::{wgpu, Texture2D, Gpu};
+use fine::graphic::{wgpu, Gpu, Texture2D};
 use fine::math::{Matrix4, Vector3};
 
 pub struct SpriteInstance {
@@ -16,21 +16,21 @@ impl SpriteInstance {
             1.0,
         ));
 
-        let mut s = Self {
+        let s = Self {
             bind_group,
             buffer,
             texture,
             origin,
         };
 
-        s.set_origin(-0.5, 0.5);
+        // s.set_origin(-0.5, 0.5);
 
         s
     }
 
     pub fn set_origin(&mut self, x: f32, y: f32) {
-        let x = -x * 2.0 * self.texture.width() as f32;
-        let y = -y * 2.0 * self.texture.height() as f32;
+        let x = -x * self.texture.width() as f32;
+        let y = -y * self.texture.height() as f32;
         self.origin[12] = x;
         self.origin[13] = y;
     }

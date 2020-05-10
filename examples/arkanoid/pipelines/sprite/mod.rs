@@ -27,10 +27,10 @@ pub struct SpritePipeline {
 impl SpritePipeline {
     pub fn new(gpu: &mut graphic::Gpu) -> Self {
         let vertices: Vec<Vertex> = vec![
-            vertex(-1.0, -1.0, 0., 0.0, 0.0),
-            vertex(-1.0, 1.0, 0., 0.0, 1.0),
-            vertex(1.0, 1.0, 0., 1.0, 1.0),
-            vertex(1.0, -1.0, 0., 1.0, 0.0),
+            vertex(-0.5, -0.5, 0., 0.0, 0.0),
+            vertex(-0.5, 0.5, 0., 0.0, 1.0),
+            vertex(0.5, 0.5, 0., 1.0, 1.0),
+            vertex(0.5, -0.5, 0., 1.0, 0.0),
         ];
 
         let indices: Vec<u16> = vec![0, 1, 2, 0, 2, 3];
@@ -202,7 +202,7 @@ impl SpritePipeline {
         pass.set_vertex_buffer(0, &self.vertex_buffer, 0, 0);
 
         for instance in instances {
-            pass.set_bind_group(1, &instance.get_bind_group(), &[]);
+            pass.set_bind_group(1, instance.get_bind_group(), &[]);
             pass.draw_indexed(0..self.index_count, 0, 0..1);
         }
     }

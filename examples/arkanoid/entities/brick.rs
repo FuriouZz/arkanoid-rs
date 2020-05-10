@@ -1,9 +1,9 @@
-use crate::pipelines::{SpritePipeline, SpriteInstance};
+use crate::pipelines::{SpriteInstance, SpritePipeline};
 use fine::graphic::Texture2D;
 use nalgebra::Matrix4;
 
 pub struct Brick {
-    sprite: SpriteInstance,
+    pub sprite: SpriteInstance,
     transform: Matrix4<f32>,
 }
 
@@ -17,12 +17,17 @@ impl Brick {
         Self { sprite, transform }
     }
     pub fn set_position(&mut self, x: f32, y: f32) {
-        self.transform[12] = x * 2.0 * self.sprite.texture.width() as f32;
-        self.transform[13] = y * 2.0 * self.sprite.texture.height() as f32;
+        self.transform[12] = x;
+        self.transform[13] = y;
     }
-    pub fn update(&mut self, frame: &mut fine::Frame, camera: &crate::camera::Camera) -> &SpriteInstance {
+    pub fn update(
+        &mut self,
+        frame: &mut fine::Frame,
+        camera: &crate::camera::Camera,
+    ) -> &SpriteInstance {
         let gpu = frame.gpu();
-        self.sprite.update_transform(gpu, &camera.model_view_projection(&self.transform));
+        self.sprite
+            .update_transform(gpu, &camera.model_view_projection(&self.transform));
         &self.sprite
     }
 }

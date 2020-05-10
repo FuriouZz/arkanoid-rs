@@ -2,7 +2,7 @@ mod camera;
 mod entities;
 mod pipelines;
 use camera::{Camera, Lens};
-use pipelines::{SpritePipeline, SpriteInstance};
+use pipelines::{SpriteInstance, SpritePipeline};
 
 pub struct ArkanoidScene {
     camera: Camera,
@@ -32,8 +32,9 @@ impl fine::Scene for ArkanoidScene {
     fn on_event(&mut self, e: fine::event::Event) {
         match e {
             fine::event::Event::Resize(width, height) => {
-                let right = width as f32;
-                let top = height as f32;
+                fine::log!("Resolution {}x{}", width, height);
+                let right = width as f32 * 0.5;
+                let top = height as f32 * 0.5;
                 let lens = &mut self.camera.lens;
                 match lens {
                     Lens::Orthographic(o) => {
