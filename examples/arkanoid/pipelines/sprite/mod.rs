@@ -105,8 +105,8 @@ impl SpritePipeline {
                 primitive_topology: wgpu::PrimitiveTopology::TriangleList,
                 color_states: &[wgpu::ColorStateDescriptor {
                     format: graphic::DEFAULT_TEXTURE_FORMAT,
-                    color_blend: wgpu::BlendDescriptor::REPLACE,
-                    alpha_blend: wgpu::BlendDescriptor::REPLACE,
+                    color_blend: graphic::blend::TRANSPARENT,
+                    alpha_blend: graphic::blend::TRANSPARENT,
                     write_mask: wgpu::ColorWrite::ALL,
                 }],
                 depth_stencil_state: None,
