@@ -40,8 +40,6 @@ impl Texture2D {
             bytes.extend_from_slice(&img.into_raw()[..]);
         }
 
-        crate::log!("{} {} {}", width, height, bytes.len());
-
         Self::from_bytes_array(gpu, width, height, buffers.len() as u32, &bytes[..])
     }
 
@@ -186,27 +184,27 @@ fn create_texture_array(
         .device
         .create_buffer_with_data(bytes, wgpu::BufferUsage::COPY_SRC);
 
-    gpu.encoder.copy_buffer_to_texture(
-        wgpu::BufferCopyView {
-            buffer: &copy,
-            offset: 0,
-            bytes_per_row: 4 * width,
-            rows_per_image: height,
-        },
-        wgpu::TextureCopyView {
-            texture: &texture,
-            mip_level: 0,
-            array_layer: 0,
-            origin: wgpu::Origin3d::ZERO,
-        },
-        wgpu::Extent3d {
-            width,
-            height,
-            depth: 1,
-        },
-    );
-
-    crate::log!("layout count={} bytes_per_row={} rows_per_image={}", layer_count, 4 * width, height);
+    for i in 0..layer_count {
+        gpu.encoder.copy_buffer_to_texture(
+            wgpu::BufferCopyView {
+                buffer: &copy,
+                offset: (i * 4 * width * height) as u64,
+                bytes_per_row: 4 * width,
+                rows_per_image: 0,
+            },
+            wgpu::TextureCopyView {
+                texture: &texture,
+                mip_level: 0,
+                array_layer: i,
+                origin: wgpu::Origin3d::ZERO,
+            },
+            wgpu::Extent3d {
+                width,
+                height,
+                depth: 1,
+            },
+        );
+    }
 
     // Create texture view
     texture.create_view(&wgpu::TextureViewDescriptor {

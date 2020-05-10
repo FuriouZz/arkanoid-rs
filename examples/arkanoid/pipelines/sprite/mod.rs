@@ -81,7 +81,7 @@ impl SpritePipeline {
             });
 
         let vertex_module = gpu.create_shader_module(&include_bytes!("./sprite.vert.spv")[..]);
-        let fragment_module = gpu.create_shader_module(&include_bytes!("./sprite.arr.frag.spv")[..]);
+        let fragment_module = gpu.create_shader_module(&include_bytes!("./sprite.frag.spv")[..]);
 
         let pipeline = gpu
             .device
