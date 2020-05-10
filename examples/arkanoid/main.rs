@@ -1,8 +1,8 @@
 mod camera;
-mod pipelines;
 mod entities;
+mod pipelines;
 use camera::{Camera, Lens};
-use pipelines::Sprite;
+use pipelines::{Sprite, SpriteInstance};
 
 // use std::collections::HashSet;
 
@@ -98,7 +98,7 @@ use pipelines::Sprite;
 pub struct ArkanoidScene {
     camera: Camera,
     sprite: Sprite,
-    brick: entities::Brick,
+    level: entities::Level,
 }
 
 impl fine::Scene for ArkanoidScene {
@@ -108,10 +108,10 @@ impl fine::Scene for ArkanoidScene {
     {
         let gpu = frame.gpu();
         let sprite = Sprite::new(gpu);
-        let brick = entities::Brick::new(gpu, &sprite);
+        let level = entities::Level::generate(2, 2, gpu, &sprite);
 
         Self {
-            brick,
+            level,
             sprite,
             camera: Camera::orthographic(-1.0, 1.0, -1.0, 1.0, 0.0, 100.0),
         }
@@ -138,8 +138,15 @@ impl fine::Scene for ArkanoidScene {
         }
     }
     fn on_draw(&mut self, mut frame: fine::Frame) {
-        let (transform, texture) = self.brick.update(&self.camera);
-        self.sprite.draw(&mut frame, texture, &transform);
+        let frame = &mut frame; // Shadowing frame
+        let camera = &self.camera;
+        let instances: Vec<&SpriteInstance> = self
+            .level
+            .bricks
+            .iter_mut()
+            .map(|brick| brick.update(frame, camera))
+            .collect();
+        self.sprite.draw(frame, instances.as_slice());
     }
 }
 

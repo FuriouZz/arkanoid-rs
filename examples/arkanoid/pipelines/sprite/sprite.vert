@@ -8,7 +8,7 @@ layout(location = 1) in vec2 v_TexCoord;
 layout(location = 0) out vec2 f_TexCoord;
 
 // Uniforms
-layout (set = 0, binding = 1) uniform Data {
+layout (set = 1, binding = 1) uniform Data {
     mat4 u_Transform;
 };
 
