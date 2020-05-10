@@ -8,7 +8,11 @@ pub struct Level {
 
 impl Level {
     pub fn generate(width: u32, height: u32, gpu: &mut Gpu, sprite: &SpritePipeline) -> Self {
-        let texture = Texture2D::from_image(gpu, &include_bytes!("../assets/brick2.png")[..]);
+        // let texture = Texture2D::from_image(gpu, &include_bytes!("../assets/brick2.png")[..]);
+        let texture = Texture2D::from_images(gpu, &[
+            &include_bytes!("../assets/brick2.png")[..],
+            &include_bytes!("../assets/brick2.png")[..],
+        ]);
 
         let bricks: Vec<Brick> = (0..width * height)
             .map(|index| {

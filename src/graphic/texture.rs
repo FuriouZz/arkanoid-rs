@@ -174,7 +174,7 @@ fn create_texture_array(
         size: wgpu::Extent3d {
             width,
             height,
-            depth: 1,
+            depth: layer_count,
         },
         mip_level_count: 1,
         sample_count: 1,

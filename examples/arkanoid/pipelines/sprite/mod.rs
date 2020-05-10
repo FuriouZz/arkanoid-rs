@@ -63,7 +63,7 @@ impl SpritePipeline {
                 visibility: wgpu::ShaderStage::FRAGMENT,
                 ty: wgpu::BindingType::SampledTexture {
                     component_type: wgpu::TextureComponentType::Float,
-                    dimension: wgpu::TextureViewDimension::D2,
+                    dimension: wgpu::TextureViewDimension::D2Array,
                     multisampled: false,
                 },
             })
@@ -81,7 +81,7 @@ impl SpritePipeline {
             });
 
         let vertex_module = gpu.create_shader_module(&include_bytes!("./sprite.vert.spv")[..]);
-        let fragment_module = gpu.create_shader_module(&include_bytes!("./sprite.frag.spv")[..]);
+        let fragment_module = gpu.create_shader_module(&include_bytes!("./sprite.arr.frag.spv")[..]);
 
         let pipeline = gpu
             .device
