@@ -27,7 +27,7 @@ impl Camera {
         &self.view
     }
 
-    pub fn get_projection(&self) -> &Matrix4<f32> {
+    pub fn get_projection(&self) -> Matrix4<f32> {
         self.lens.get_projection()
     }
 
@@ -47,10 +47,13 @@ pub enum Lens {
 }
 
 impl Lens {
-    pub fn get_projection(&self) -> &Matrix4<f32> {
+    // Return projection matrix
+    // WARNING: Due to the new Vulkan coordinate system, we need correction.
+    // Read: https://matthewwellings.com/blog/the-new-vulkan-coordinate-system/
+    pub fn get_projection(&self) -> Matrix4<f32> {
         match self {
-            Self::Orthographic(o) => o.as_matrix(),
-            Self::Perspective(p) => p.as_matrix(),
+            Self::Orthographic(o) => Matrix4::from_row_slice(&fine::graphic::OPENGL_TO_WGPU_MATRIX) * o.as_matrix(),
+            Self::Perspective(p) => Matrix4::from_row_slice(&fine::graphic::OPENGL_TO_WGPU_MATRIX) * p.as_matrix(),
         }
     }
 }

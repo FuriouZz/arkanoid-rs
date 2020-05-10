@@ -113,7 +113,7 @@ impl fine::Scene for ArkanoidScene {
         Self {
             brick,
             sprite,
-            camera: Camera::orthographic(-1.0, 1.0, -1.0, 1.0, -100.0, 100.0),
+            camera: Camera::orthographic(-1.0, 1.0, -1.0, 1.0, 0.0, 100.0),
         }
     }
 
@@ -123,8 +123,8 @@ impl fine::Scene for ArkanoidScene {
     fn on_event(&mut self, e: fine::event::Event) {
         match e {
             fine::event::Event::Resize(width, height) => {
-                let right = (width as f32) * 0.5;
-                let top = (height as f32) * 0.5;
+                let right = width as f32;
+                let top = height as f32;
                 let lens = &mut self.camera.lens;
                 match lens {
                     Lens::Orthographic(o) => {

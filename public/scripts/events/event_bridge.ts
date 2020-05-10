@@ -57,7 +57,7 @@ export class EventBridge {
   }
 
   private _resize() {
-    this._handler.on_resize(window.innerWidth, window.innerHeight)
+    this._handler.on_resize(Math.floor(window.innerWidth), Math.floor(window.innerHeight))
   }
 
   private _frame() {
