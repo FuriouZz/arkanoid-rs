@@ -54,7 +54,12 @@ impl fine::Scene for ArkanoidScene {
             .iter_mut()
             .map(|brick| &brick.sprite)
             .collect();
-        self.sprite.draw(frame, &self.camera, instances.as_slice());
+        self.sprite.draw(
+            frame,
+            &self.camera,
+            &self.level.texture_binding,
+            instances.as_slice(),
+        );
     }
 }
 

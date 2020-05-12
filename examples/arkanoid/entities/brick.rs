@@ -1,13 +1,17 @@
 use crate::pipelines::{Sprite, SpritePipeline};
-use fine::graphic::Texture2D;
+use fine::graphic::Texture2DAtlas;
 
 pub struct Brick {
     pub sprite: Sprite,
 }
 
 impl Brick {
-    pub fn new(gpu: &mut fine::graphic::Gpu, pipeline: &SpritePipeline, texture: &Texture2D) -> Self {
-        let sprite = pipeline.create_sprite(gpu, texture);
+    pub fn new(
+        gpu: &mut fine::graphic::Gpu,
+        pipeline: &SpritePipeline,
+        texture: &Texture2DAtlas,
+    ) -> Self {
+        let sprite = pipeline.create_sprite(texture);
 
         Self { sprite }
     }

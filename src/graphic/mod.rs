@@ -15,6 +15,7 @@ pub use gpu::GpuOptions;
 pub use wgpu;
 mod texture;
 pub use texture::Texture2D;
+pub use texture::Texture2DAtlas;
 
 pub const DEFAULT_TEXTURE_FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Bgra8Unorm;
 

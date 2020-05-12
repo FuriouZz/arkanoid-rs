@@ -1,102 +1,69 @@
-use fine::graphic::{wgpu, Gpu, Texture2D};
-use fine::math::{Matrix4, Vector3};
+use fine::graphic::Texture2DAtlas;
+use fine::math::{UnitQuaternion, Vector3, Vector4};
 
 pub struct Sprite {
-    bind_group: wgpu::BindGroup,
-    buffer: wgpu::Buffer,
-    texture_width: u32,
-    texture_height: u32,
-    origin: Matrix4<f32>,
-    transform: Matrix4<f32>,
+    layer: u32,
+    translation: Vector3<f32>,
+    scaling: Vector3<f32>,
+    rotation: UnitQuaternion<f32>,
+    origin: Vector4<f32>,
 }
 
 impl Sprite {
-    pub fn new(gpu: &Gpu, layout: &wgpu::BindGroupLayout, texture: &Texture2D) -> Self {
-        let transform_buffer = gpu.device.create_buffer(&wgpu::BufferDescriptor {
-            usage: wgpu::BufferUsage::COPY_DST | wgpu::BufferUsage::UNIFORM,
-            size: std::mem::size_of::<Matrix4<f32>>() as wgpu::BufferAddress,
-            label: None,
-        });
-
-        let bind_group = gpu.device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: None,
-            layout,
-            bindings: &[
-                wgpu::Binding {
-                    binding: 0,
-                    resource: wgpu::BindingResource::TextureView(texture.view()),
-                },
-                wgpu::Binding {
-                    binding: 1,
-                    resource: wgpu::BindingResource::Buffer {
-                        buffer: &transform_buffer,
-                        range: 0..std::mem::size_of::<Matrix4<f32>>() as wgpu::BufferAddress,
-                    },
-                },
-            ],
-        });
-
-        let origin = Matrix4::new_nonuniform_scaling(&Vector3::new(
-            texture.width() as f32,
-            texture.height() as f32,
-            1.0,
-        ));
-
+    pub fn new(texture: &Texture2DAtlas) -> Self {
         Self {
-            bind_group,
-            buffer: transform_buffer,
-            texture_width: texture.width(),
-            texture_height: texture.height(),
-            origin,
-            transform: Matrix4::identity(),
+            layer: 0,
+            translation: Vector3::new(0.0, 0.0, 0.0),
+            scaling: Vector3::new(1.0, 1.0, 1.0),
+            rotation: UnitQuaternion::from_euler_angles(0.0, 0.0, 0.0),
+            origin: Vector4::new(
+                texture.width() as f32 * -0.5,
+                texture.height() as f32 * -0.5,
+                texture.width() as f32,
+                texture.height() as f32,
+            ),
         }
     }
 
+    pub fn set_layer(&mut self, layer: u32) {
+        self.layer = layer;
+    }
+
     pub fn set_origin(&mut self, x: f32, y: f32) {
-        let x = -x * self.texture_width as f32;
-        let y = -y * self.texture_height as f32;
-        self.origin[12] = x;
-        self.origin[13] = y;
+        let x = -x * self.origin[2] as f32;
+        let y = -y * self.origin[3] as f32;
+        self.origin[0] = x;
+        self.origin[1] = y;
     }
 
     pub fn set_position(&mut self, x: f32, y: f32) {
-        self.transform[12] = x;
-        self.transform[13] = y;
+        self.translation[0] = x;
+        self.translation[1] = y;
     }
 
     pub fn x(&self) -> f32 {
-        self.transform[12]
+        self.translation[0]
     }
 
     pub fn y(&self) -> f32 {
-        self.transform[13]
+        self.translation[1]
     }
 
     pub fn width(&self) -> f32 {
-        self.texture_width as f32
+        self.scaling[0] * self.origin[2]
     }
 
     pub fn height(&self) -> f32 {
-        self.texture_height as f32
+        self.scaling[1] * self.origin[3]
     }
 
-    pub(super) fn get_bind_group(&self) -> &wgpu::BindGroup {
-        &self.bind_group
-    }
-
-    pub(super) fn update_buffer(&self, gpu: &mut Gpu, projection: &Matrix4<f32>) {
-        let t = projection * self.transform * self.origin;
-
-        // Update transform
-        let transform_buffer = gpu.create_buffer(t.as_slice(), wgpu::BufferUsage::COPY_SRC);
-
-        let encoder = &mut gpu.encoder;
-        encoder.copy_buffer_to_buffer(
-            &transform_buffer,
-            0,
-            &self.buffer,
-            0,
-            std::mem::size_of::<Matrix4<f32>>() as wgpu::BufferAddress,
-        );
+    pub(super) fn as_instance(&self) -> super::SpriteInstance {
+        super::SpriteInstance {
+            layer: self.layer,
+            translation: self.translation.clone(),
+            rotation: self.rotation.clone(),
+            scaling: self.scaling.clone(),
+            origin: self.origin.clone(),
+        }
     }
 }

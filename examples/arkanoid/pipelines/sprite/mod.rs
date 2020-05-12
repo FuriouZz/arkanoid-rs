@@ -2,6 +2,7 @@ use fine::graphic;
 use fine::graphic::vertex_attribute::{position_texcoord::Vertex, VertexAttributeDescriptor};
 use fine::graphic::wgpu;
 mod sprite;
+use fine::math::{Matrix4, UnitQuaternion, Vector3, Vector4};
 pub use sprite::Sprite;
 
 fn vertex(x: f32, y: f32, z: f32, u: f32, v: f32) -> Vertex {
@@ -16,11 +17,13 @@ pub struct SpritePipeline {
     vertex_buffer: wgpu::Buffer,
     index_buffer: wgpu::Buffer,
     index_count: u32,
+    instance_buffer: wgpu::Buffer,
 
     // Rendering
     pipeline: wgpu::RenderPipeline,
     constant_group: wgpu::BindGroup,
     instance_layout: graphic::BindingLayout,
+    projection_buffer: wgpu::Buffer,
 }
 
 impl SpritePipeline {
@@ -36,6 +39,17 @@ impl SpritePipeline {
 
         let vertex_buffer = gpu.create_buffer(&vertices, wgpu::BufferUsage::VERTEX);
         let index_buffer = gpu.create_buffer(&indices, wgpu::BufferUsage::INDEX);
+        let instance_buffer = gpu.device.create_buffer(&wgpu::BufferDescriptor {
+            label: None,
+            usage: wgpu::BufferUsage::VERTEX | wgpu::BufferUsage::COPY_DST,
+            size: SpriteInstance::SIZE * SpriteInstance::MAX as wgpu::BufferAddress,
+        });
+
+        let projection_buffer = gpu.device.create_buffer(&wgpu::BufferDescriptor {
+            label: None,
+            usage: wgpu::BufferUsage::UNIFORM | wgpu::BufferUsage::COPY_DST,
+            size: std::mem::size_of::<Matrix4<f32>>() as wgpu::BufferAddress,
+        });
 
         let sampler = gpu.device.create_sampler(&wgpu::SamplerDescriptor {
             address_mode_u: wgpu::AddressMode::ClampToEdge,
@@ -50,10 +64,17 @@ impl SpritePipeline {
         });
 
         let constant_binding = graphic::BindingDescriptor::new()
+            // Texture sampler
             .entry(wgpu::BindGroupLayoutEntry {
                 binding: 0,
                 visibility: wgpu::ShaderStage::FRAGMENT,
                 ty: wgpu::BindingType::Sampler { comparison: false },
+            })
+            // Projection matrix
+            .entry(wgpu::BindGroupLayoutEntry {
+                binding: 1,
+                visibility: wgpu::ShaderStage::VERTEX,
+                ty: wgpu::BindingType::UniformBuffer { dynamic: false },
             })
             .build(&gpu.device);
 
@@ -66,11 +87,6 @@ impl SpritePipeline {
                     dimension: wgpu::TextureViewDimension::D2Array,
                     multisampled: false,
                 },
-            })
-            .entry(wgpu::BindGroupLayoutEntry {
-                binding: 1,
-                visibility: wgpu::ShaderStage::VERTEX | wgpu::ShaderStage::FRAGMENT,
-                ty: wgpu::BindingType::UniformBuffer { dynamic: false },
             })
             .build(&gpu.device);
 
@@ -112,24 +128,68 @@ impl SpritePipeline {
                 depth_stencil_state: None,
                 vertex_state: wgpu::VertexStateDescriptor {
                     index_format: wgpu::IndexFormat::Uint16,
-                    vertex_buffers: &[wgpu::VertexBufferDescriptor {
-                        stride: Vertex::STRIDE,
-                        attributes: Vertex::ATTRIBUTES,
-                        step_mode: wgpu::InputStepMode::Vertex,
-                    }],
+                    vertex_buffers: &[
+                        wgpu::VertexBufferDescriptor {
+                            stride: Vertex::STRIDE,
+                            attributes: Vertex::ATTRIBUTES,
+                            step_mode: wgpu::InputStepMode::Vertex,
+                        },
+                        wgpu::VertexBufferDescriptor {
+                            stride: SpriteInstance::SIZE,
+                            step_mode: wgpu::InputStepMode::Instance,
+                            attributes: &[
+                                // Layer
+                                wgpu::VertexAttributeDescriptor {
+                                    format: wgpu::VertexFormat::Uint,
+                                    offset: 0,
+                                    shader_location: 2,
+                                },
+                                // Translation
+                                wgpu::VertexAttributeDescriptor {
+                                    format: wgpu::VertexFormat::Float3,
+                                    offset: 4,
+                                    shader_location: 3,
+                                },
+                                // Scaling
+                                wgpu::VertexAttributeDescriptor {
+                                    format: wgpu::VertexFormat::Float3,
+                                    offset: 4 + 3 * 4,
+                                    shader_location: 4,
+                                },
+                                // Rotation
+                                wgpu::VertexAttributeDescriptor {
+                                    format: wgpu::VertexFormat::Float4,
+                                    offset: 4 + 3 * 4 + 3 * 4,
+                                    shader_location: 5,
+                                },
+                                // Origin
+                                wgpu::VertexAttributeDescriptor {
+                                    format: wgpu::VertexFormat::Float4,
+                                    offset: 4 + 3 * 4 + 3 * 4 + 4 * 4,
+                                    shader_location: 6,
+                                },
+                            ],
+                        },
+                    ],
                 },
                 sample_count: 1,
                 sample_mask: !0,
                 alpha_to_coverage_enabled: false,
             });
 
+        let resources = constant_binding.bind(|binding| match binding.binding {
+            0 => Some(wgpu::BindingResource::Sampler(&sampler)),
+            1 => Some(wgpu::BindingResource::Buffer {
+                buffer: &projection_buffer,
+                range: 0..std::mem::size_of::<Matrix4<f32>>() as wgpu::BufferAddress,
+            }),
+            _ => None,
+        });
+
         let constant_group = gpu.device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: None,
             layout: constant_binding.get_layout(),
-            bindings: &[wgpu::Binding {
-                binding: 0,
-                resource: wgpu::BindingResource::Sampler(&sampler),
-            }],
+            bindings: resources.as_slice(),
         });
 
         Self {
@@ -137,51 +197,134 @@ impl SpritePipeline {
             vertex_buffer,
             index_buffer,
             index_count: indices.len() as u32,
+            instance_buffer,
 
             // Rendering
             pipeline,
             constant_group,
             instance_layout,
+            projection_buffer,
         }
     }
 
-    pub fn create_sprite(&self, gpu: &graphic::Gpu, texture: &graphic::Texture2D) -> Sprite {
-        Sprite::new(gpu, self.instance_layout.get_layout(), texture)
+    pub fn create_sprite(&self, texture: &graphic::Texture2DAtlas) -> Sprite {
+        Sprite::new(texture)
     }
 
-    pub fn draw(&mut self, frame: &mut fine::Frame, camera: &crate::camera::Camera, instances: &[&Sprite]) {
+    pub fn create_texture_binding(
+        &self,
+        gpu: &graphic::Gpu,
+        texture: &graphic::Texture2DAtlas,
+    ) -> wgpu::BindGroup {
+        gpu.device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: None,
+            layout: self.instance_layout.get_layout(),
+            bindings: &[wgpu::Binding {
+                binding: 0,
+                resource: wgpu::BindingResource::TextureView(texture.view()),
+            }],
+        })
+    }
+
+    pub fn draw(
+        &mut self,
+        frame: &mut fine::Frame,
+        camera: &crate::camera::Camera,
+        texture_binding: &wgpu::BindGroup,
+        instances: &[&Sprite],
+    ) {
         let (gpu, attachment) = frame.target();
 
-        for instance in instances {
-            instance.update_buffer(gpu, &camera.get_view_projection());
+        // Update projection matrix
+        {
+            let projection_buffer = gpu.create_buffer(
+                camera.get_view_projection().as_slice(),
+                wgpu::BufferUsage::COPY_SRC,
+            );
+
+            let encoder = &mut gpu.encoder;
+            encoder.copy_buffer_to_buffer(
+                &projection_buffer,
+                0,
+                &self.projection_buffer,
+                0,
+                std::mem::size_of::<Matrix4<f32>>() as wgpu::BufferAddress,
+            );
         }
 
-        let encoder = &mut gpu.encoder;
+        // let instance_count = instances.len();
 
-        let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-            color_attachments: &[wgpu::RenderPassColorAttachmentDescriptor {
-                attachment,
-                resolve_target: None,
-                load_op: wgpu::LoadOp::Clear,
-                store_op: wgpu::StoreOp::Store,
-                clear_color: wgpu::Color {
-                    r: 0.,
-                    g: 0.,
-                    b: 0.,
-                    a: 1.,
-                },
-            }],
-            depth_stencil_attachment: None,
-        });
+        let mut i = 0;
+        let length = instances.len();
 
-        pass.set_pipeline(&self.pipeline);
-        pass.set_bind_group(0, &self.constant_group, &[]);
-        pass.set_index_buffer(&self.index_buffer, 0, 0);
-        pass.set_vertex_buffer(0, &self.vertex_buffer, 0, 0);
+        while i < length {
+            let offset_start = i;
+            let offset_end = (offset_start + SpriteInstance::MAX).min(length);
+            let instance_count = offset_end - offset_start;
 
-        for instance in instances {
-            pass.set_bind_group(1, instance.get_bind_group(), &[]);
-            pass.draw_indexed(0..self.index_count, 0, 0..1);
+            let mut bytes: Vec<u8> = Vec::new();
+
+            for j in offset_start..offset_end {
+                bytes.extend_from_slice(&instances[j].as_instance().as_bytes());
+            }
+
+            let buffer = gpu.create_buffer(&bytes, wgpu::BufferUsage::COPY_SRC);
+
+            let encoder = &mut gpu.encoder;
+            encoder.copy_buffer_to_buffer(
+                &buffer,
+                0,
+                &self.instance_buffer,
+                0,
+                SpriteInstance::SIZE * instance_count as wgpu::BufferAddress,
+            );
+
+            let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                color_attachments: &[wgpu::RenderPassColorAttachmentDescriptor {
+                    attachment,
+                    resolve_target: None,
+                    load_op: wgpu::LoadOp::Clear,
+                    store_op: wgpu::StoreOp::Store,
+                    clear_color: wgpu::Color {
+                        r: 0.,
+                        g: 0.,
+                        b: 0.,
+                        a: 1.,
+                    },
+                }],
+                depth_stencil_attachment: None,
+            });
+
+            pass.set_pipeline(&self.pipeline);
+            pass.set_bind_group(0, &self.constant_group, &[]);
+            pass.set_bind_group(1, texture_binding, &[]);
+            pass.set_index_buffer(&self.index_buffer, 0, 0);
+            pass.set_vertex_buffer(0, &self.vertex_buffer, 0, 0);
+            pass.set_vertex_buffer(1, &self.instance_buffer, 0, 0);
+            pass.draw_indexed(0..self.index_count, 0, 0..instance_count as u32);
+
+            i += SpriteInstance::MAX;
         }
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct SpriteInstance {
+    layer: u32,
+    translation: Vector3<f32>,
+    scaling: Vector3<f32>,
+    rotation: UnitQuaternion<f32>,
+    origin: Vector4<f32>,
+}
+
+unsafe impl bytemuck::Pod for SpriteInstance {}
+unsafe impl bytemuck::Zeroable for SpriteInstance {}
+
+impl SpriteInstance {
+    const SIZE: u64 = std::mem::size_of::<SpriteInstance>() as _;
+    const MAX: usize = 1_000;
+
+    pub fn as_bytes(&self) -> Vec<u8> {
+        bytemuck::cast_slice(&[self.clone()]).to_vec()
     }
 }

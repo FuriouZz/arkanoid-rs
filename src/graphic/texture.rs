@@ -15,6 +15,16 @@ impl Texture2D {
         Self::from_bytes(gpu, width, height, &img.into_raw()[..])
     }
 
+    // pub fn from_image2<P: image::Pixel<Subpixel = u8> + 'static>(
+    //     gpu: &mut super::Gpu,
+    //     img: image::ImageBuffer<P, Vec<P::Subpixel>>,
+    // ) -> Self {
+    //     let width = img.width();
+    //     let height = img.height();
+
+    //     Self::from_bytes(gpu, width, height, &img.into_raw()[..])
+    // }
+
     pub fn from_bytes(gpu: &mut super::Gpu, width: u32, height: u32, bytes: &[u8]) -> Self {
         let texture = create_texture(gpu, width, height, bytes);
 
@@ -25,6 +35,40 @@ impl Texture2D {
         }
     }
 
+    pub fn red(gpu: &mut super::Gpu, size: usize) -> Self {
+        let bytes: Vec<u8> = (0..size * size)
+            .flat_map(|_index| {
+                std::iter::once(0xFF)
+                    .chain(std::iter::once(0x00))
+                    .chain(std::iter::once(0x00))
+                    .chain(std::iter::once(1))
+            })
+            .collect();
+
+        Self::from_bytes(gpu, size as u32, size as u32, &bytes)
+    }
+
+    pub fn view(&self) -> &wgpu::TextureView {
+        &self.texture
+    }
+
+    pub fn width(&self) -> u32 {
+        self.width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.height
+    }
+}
+
+pub struct Texture2DAtlas {
+    texture: wgpu::TextureView,
+    width: u32,
+    height: u32,
+    atlas: std::collections::HashMap<u32, (u32, u32)>,
+}
+
+impl Texture2DAtlas {
     pub fn from_images(gpu: &mut super::Gpu, buffers: &[&[u8]]) -> Self {
         let mut width = 0;
         let mut height = 0;
@@ -66,24 +110,21 @@ impl Texture2D {
     ) -> Self {
         let texture = create_texture_array(gpu, width, height, layout_count, bytes);
 
+        let mut atlas = std::collections::HashMap::new();
+        for i in 0..layout_count {
+            atlas.insert(i, (width, height));
+        }
+
         Self {
             texture,
             width,
             height,
+            atlas,
         }
     }
 
-    pub fn red(gpu: &mut super::Gpu, size: usize) -> Self {
-        let bytes: Vec<u8> = (0..size * size)
-            .flat_map(|_index| {
-                std::iter::once(0xFF)
-                    .chain(std::iter::once(0x00))
-                    .chain(std::iter::once(0x00))
-                    .chain(std::iter::once(1))
-            })
-            .collect();
-
-        Self::from_bytes(gpu, size as u32, size as u32, &bytes)
+    pub fn get_layer_size(&self, layer: u32) -> &(u32, u32) {
+        self.atlas.get(&layer).expect("No layer found")
     }
 
     pub fn view(&self) -> &wgpu::TextureView {
