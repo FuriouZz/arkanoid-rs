@@ -1,3 +1,6 @@
+#![deny(unused_results)]
+#![allow(unused)]
+
 mod context;
 pub mod event;
 pub mod graphic;

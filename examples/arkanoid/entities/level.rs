@@ -1,6 +1,6 @@
 use super::Brick;
 use crate::pipelines::SpritePipeline;
-use fine::graphic::{wgpu, Gpu, Texture2DAtlas, Texture2D, TexturePacked};
+use fine::graphic::{wgpu, Gpu, TexturePacked};
 use fine::math::Vector4;
 
 pub struct Level {

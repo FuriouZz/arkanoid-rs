@@ -11,7 +11,7 @@ pub struct Bridge {
 }
 
 impl Bridge {
-    pub(crate) unsafe fn init<F>(init: F) -> &'static mut Self
+    pub(crate) unsafe fn init<F>(init: F)
     where
         F: FnOnce() -> crate::context::Context,
     {
@@ -20,7 +20,6 @@ impl Bridge {
         bridge.handler = Some(handler);
         ffi::log("Bridge initialized 🔧");
         bridge.get_handler().init();
-        bridge
     }
 
     pub fn get() -> &'static mut Self {

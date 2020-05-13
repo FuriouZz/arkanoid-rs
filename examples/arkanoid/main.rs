@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 mod camera;
 mod entities;
 mod pipelines;

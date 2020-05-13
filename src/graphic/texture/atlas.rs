@@ -104,7 +104,7 @@ impl Texture2DAtlas {
             },
         );
 
-        self.layers.insert(array_layer, (width, height));
+        let _ = self.layers.insert(array_layer, (width, height));
     }
 
     pub fn append_image(&mut self, gpu: &mut Gpu, img: DynamicImage) {
@@ -143,7 +143,7 @@ impl Texture2DAtlas {
             },
         );
 
-        self.layers.insert(array_layer, (rectangle[2], rectangle[3]));
+        let _ = self.layers.insert(array_layer, (rectangle[2], rectangle[3]));
     }
 
     fn assert(&self, width: u32, height: u32) {
