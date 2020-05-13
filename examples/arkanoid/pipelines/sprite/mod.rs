@@ -2,8 +2,10 @@ use fine::graphic;
 use fine::graphic::vertex_attribute::{position_texcoord::Vertex, VertexAttributeDescriptor};
 use fine::graphic::wgpu;
 mod sprite;
+mod clip;
 use fine::math::{Matrix4, UnitQuaternion, Vector3, Vector4};
 pub use sprite::Sprite;
+pub use clip::SpriteClip;
 
 fn vertex(x: f32, y: f32, z: f32, u: f32, v: f32) -> Vertex {
     Vertex {
@@ -55,7 +57,7 @@ impl SpritePipeline {
             address_mode_u: wgpu::AddressMode::ClampToEdge,
             address_mode_v: wgpu::AddressMode::ClampToEdge,
             address_mode_w: wgpu::AddressMode::ClampToEdge,
-            mag_filter: wgpu::FilterMode::Nearest,
+            mag_filter: wgpu::FilterMode::Linear,
             min_filter: wgpu::FilterMode::Nearest,
             mipmap_filter: wgpu::FilterMode::Nearest,
             compare: wgpu::CompareFunction::Undefined,
@@ -143,34 +145,34 @@ impl SpritePipeline {
                             stride: SpriteInstance::SIZE,
                             step_mode: wgpu::InputStepMode::Instance,
                             attributes: &[
-                                // Layer
+                                // Layer and origin
                                 wgpu::VertexAttributeDescriptor {
-                                    format: wgpu::VertexFormat::Uint,
+                                    format: wgpu::VertexFormat::Float3,
                                     offset: 0,
                                     shader_location: 2,
+                                },
+                                // Layer Rect
+                                wgpu::VertexAttributeDescriptor {
+                                    format: wgpu::VertexFormat::Float4,
+                                    offset: 3*4,
+                                    shader_location: 3,
                                 },
                                 // Translation
                                 wgpu::VertexAttributeDescriptor {
                                     format: wgpu::VertexFormat::Float3,
-                                    offset: 4,
-                                    shader_location: 3,
+                                    offset: 3*4 + 4*4,
+                                    shader_location: 4,
                                 },
                                 // Scaling
                                 wgpu::VertexAttributeDescriptor {
                                     format: wgpu::VertexFormat::Float3,
-                                    offset: 4 + 3 * 4,
-                                    shader_location: 4,
+                                    offset: 3*4 + 4*4 + 3*4,
+                                    shader_location: 5,
                                 },
                                 // Rotation
                                 wgpu::VertexAttributeDescriptor {
                                     format: wgpu::VertexFormat::Float4,
-                                    offset: 4 + 3 * 4 + 3 * 4,
-                                    shader_location: 5,
-                                },
-                                // Origin
-                                wgpu::VertexAttributeDescriptor {
-                                    format: wgpu::VertexFormat::Float4,
-                                    offset: 4 + 3 * 4 + 3 * 4 + 4 * 4,
+                                    offset: 3*4 + 4*4 + 3*4 + 3*4,
                                     shader_location: 6,
                                 },
                             ],
@@ -216,8 +218,8 @@ impl SpritePipeline {
         &self,
         gpu: &graphic::Gpu,
         view: &wgpu::TextureView,
-        width: u32,
-        height: u32,
+        width: f32,
+        height: f32,
     ) -> wgpu::BindGroup {
         let buffer = gpu.create_buffer(&[width, height], wgpu::BufferUsage::UNIFORM);
 
@@ -231,7 +233,7 @@ impl SpritePipeline {
                 binding: 1,
                 resource: wgpu::BindingResource::Buffer {
                     buffer: &buffer,
-                    range: 0..std::mem::size_of::<(u32, u32)>() as wgpu::BufferAddress,
+                    range: 0..std::mem::size_of::<(f32, f32)>() as wgpu::BufferAddress,
                 }
             }],
         })
@@ -241,7 +243,7 @@ impl SpritePipeline {
         &mut self,
         frame: &mut fine::Frame,
         camera: &crate::camera::Camera,
-        texture_binding: &wgpu::BindGroup,
+        binding: &wgpu::BindGroup,
         instances: &[&Sprite],
     ) {
         let (gpu, attachment) = frame.target();
@@ -262,8 +264,6 @@ impl SpritePipeline {
                 std::mem::size_of::<Matrix4<f32>>() as wgpu::BufferAddress,
             );
         }
-
-        // let instance_count = instances.len();
 
         let mut i = 0;
         let length = instances.len();
@@ -308,7 +308,7 @@ impl SpritePipeline {
 
             pass.set_pipeline(&self.pipeline);
             pass.set_bind_group(0, &self.constant_group, &[]);
-            pass.set_bind_group(1, texture_binding, &[]);
+            pass.set_bind_group(1, binding, &[]);
             pass.set_index_buffer(&self.index_buffer, 0, 0);
             pass.set_vertex_buffer(0, &self.vertex_buffer, 0, 0);
             pass.set_vertex_buffer(1, &self.instance_buffer, 0, 0);
@@ -321,11 +321,11 @@ impl SpritePipeline {
 
 #[derive(Clone, Copy, Debug)]
 pub struct SpriteInstance {
-    layer: u32,
+    layer: Vector3<f32>,
+    layer_rect: Vector4<f32>,
     translation: Vector3<f32>,
     scaling: Vector3<f32>,
     rotation: UnitQuaternion<f32>,
-    layer_rect: Vector4<f32>,
 }
 
 unsafe impl bytemuck::Pod for SpriteInstance {}

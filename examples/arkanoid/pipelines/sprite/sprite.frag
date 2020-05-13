@@ -2,7 +2,7 @@
 
 // Input
 layout(location = 0) in vec2 f_TexCoord;
-layout(location = 1) flat in uint f_Layer;
+layout(location = 1) in float f_Layer;
 
 // Output
 layout(location = 0) out vec4 o_Color;

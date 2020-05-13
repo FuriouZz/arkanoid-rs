@@ -12,43 +12,36 @@ pub struct Sprite {
 }
 
 impl Sprite {
-    // pub fn from_texture(texture: &Texture) -> Self {
-    //     let (width, height) = texture.get_dimension();
-    //     Self {
-    //         layer: 0,
-    //         translation: Vector3::new(0.0, 0.0, 0.0),
-    //         scaling: Vector3::new(1.0, 1.0, 1.0),
-    //         rotation: UnitQuaternion::from_euler_angles(0.0, 0.0, 0.0),
-    //         origin: Vector2::new(
-    //             width as f32 * -0.5,
-    //             height as f32 * -0.5,
-    //         ),
-    //         layer_rect: Vector4::new(0.0, 0.0, width as f32, height as f32),
-    //     }
-    // }
-
-    pub fn from_atlas(atlas: &TextureAtlas, name: &str) -> Self {
-        let (layer, rectangle) = atlas.rectangle(name);
+    pub fn from_frame(layer: u32, frame: &Vector4<f32>) -> Self {
         Self {
-            layer: *layer,
+            layer,
             translation: Vector3::new(0.0, 0.0, 0.0),
             scaling: Vector3::new(1.0, 1.0, 1.0),
             rotation: UnitQuaternion::from_euler_angles(0.0, 0.0, 0.0),
             origin: Vector2::new(
-                rectangle[2] as f32 * -0.5,
-                rectangle[3] as f32 * -0.5,
+                0.5,
+                0.5,
             ),
-            layer_rect: rectangle.clone(),
+            layer_rect: frame.clone(),
         }
     }
 
-    pub fn set_layer(&mut self, layer: u32) {
+    pub fn from_atlas(name: &str, atlas: &TextureAtlas) -> Self {
+        let (layer, frame) = atlas.frame(name);
+        Self::from_frame(*layer, frame)
+    }
+
+    pub fn set_frame(&mut self, layer: u32, frame: &Vector4<f32>) {
         self.layer = layer;
+        self.layer_rect = frame.clone();
+    }
+
+    pub fn set_frame_from_atlas(&mut self, name: &str, atlas: &TextureAtlas) {
+        let (layer, frame) = atlas.frame(name);
+        self.set_frame(*layer, frame);
     }
 
     pub fn set_origin(&mut self, x: f32, y: f32) {
-        let x = -x * self.origin[2] as f32;
-        let y = -y * self.origin[3] as f32;
         self.origin[0] = x;
         self.origin[1] = y;
     }
@@ -56,6 +49,15 @@ impl Sprite {
     pub fn set_position(&mut self, x: f32, y: f32) {
         self.translation[0] = x;
         self.translation[1] = y;
+    }
+
+    pub fn scale(&mut self, s: f32) {
+        self.scaling[0] = s;
+        self.scaling[1] = s;
+    }
+
+    pub fn rotate(&mut self, rad: f32) {
+        self.rotation = UnitQuaternion::from_euler_angles(0.0, 0.0, rad);
     }
 
     pub fn x(&self) -> f32 {
@@ -76,19 +78,11 @@ impl Sprite {
 
     pub(super) fn as_instance(&self) -> SpriteInstance {
         SpriteInstance {
-            layer: self.layer,
-            translation: Vector3::new(
-                self.translation[0] + self.origin[0],
-                self.translation[1] + self.origin[1],
-                self.translation[2],
-            ),
+            layer: Vector3::new(self.layer as f32, self.origin[0], self.origin[1]),
+            layer_rect: self.layer_rect.clone(),
+            translation: self.translation.clone(),
+            scaling: self.scaling.clone(),
             rotation: self.rotation.clone(),
-            scaling: Vector3::new(
-                self.width(),
-                self.height(),
-                self.scaling[2]
-            ),
-            layer_rect: self.layer_rect.clone()
         }
     }
 }

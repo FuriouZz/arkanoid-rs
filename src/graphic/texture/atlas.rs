@@ -55,7 +55,7 @@ impl TextureAtlas {
         &self.view
     }
 
-    pub fn rectangle<S>(&self, name: S) -> &(u32, Vector4<f32>)
+    pub fn frame<S>(&self, name: S) -> &(u32, Vector4<f32>)
     where
         S: Into<String>,
     {

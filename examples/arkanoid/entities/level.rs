@@ -2,6 +2,7 @@ use super::Brick;
 use crate::pipelines::SpritePipeline;
 use fine::graphic::{wgpu, Gpu, TextureAtlas};
 use fine::math::{Vector2, Vector4};
+use std::rc::Rc;
 
 pub struct Level {
     pub bricks: Vec<Brick>,
@@ -27,14 +28,21 @@ impl Level {
             );
         });
 
-        let (width, height, ..) = atlas.dimensions();
-        let texture_binding = sprite.create_texture_binding(gpu, atlas.as_view(), width, height);
+        let (w, h, ..) = atlas.dimensions();
+        let texture_binding = sprite.create_texture_binding(gpu, atlas.as_view(), w as f32, h as f32);
+
+        let atlas = Rc::new(atlas);
 
         let bricks: Vec<Brick> = (0..width * height)
             .map(|index| {
                 let x = (index % width) as f32;
                 let y = f32::floor((index as f32) / (width as f32));
-                let mut brick = Brick::new(&atlas);
+                let mut brick = Brick::new(atlas.clone());
+
+                if index % 2 == 0 {
+                    brick.sprite.set_frame("green");
+                }
+
                 brick.sprite.set_position(
                     x * brick.sprite.width() as f32,
                     y * brick.sprite.height() as f32,
