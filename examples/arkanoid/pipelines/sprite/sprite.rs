@@ -1,5 +1,5 @@
-use fine::graphic::{Texture2D, Texture2DAtlas};
-use fine::math::{UnitQuaternion, Vector3, Vector4};
+use fine::graphic::{Texture, TextureAtlas};
+use fine::math::{UnitQuaternion, Vector2, Vector3, Vector4};
 use super::SpriteInstance;
 
 pub struct Sprite {
@@ -7,39 +7,38 @@ pub struct Sprite {
     translation: Vector3<f32>,
     scaling: Vector3<f32>,
     rotation: UnitQuaternion<f32>,
-    origin: Vector4<f32>,
+    origin: Vector2<f32>,
+    layer_rect: Vector4<f32>,
 }
 
 impl Sprite {
-    pub fn from_texture(texture: &Texture2D) -> Self {
-        let (width, height) = texture.get_dimension();
-        Self {
-            layer: 0,
-            translation: Vector3::new(0.0, 0.0, 0.0),
-            scaling: Vector3::new(1.0, 1.0, 1.0),
-            rotation: UnitQuaternion::from_euler_angles(0.0, 0.0, 0.0),
-            origin: Vector4::new(
-                width as f32 * -0.5,
-                height as f32 * -0.5,
-                width as f32,
-                height as f32,
-            ),
-        }
-    }
+    // pub fn from_texture(texture: &Texture) -> Self {
+    //     let (width, height) = texture.get_dimension();
+    //     Self {
+    //         layer: 0,
+    //         translation: Vector3::new(0.0, 0.0, 0.0),
+    //         scaling: Vector3::new(1.0, 1.0, 1.0),
+    //         rotation: UnitQuaternion::from_euler_angles(0.0, 0.0, 0.0),
+    //         origin: Vector2::new(
+    //             width as f32 * -0.5,
+    //             height as f32 * -0.5,
+    //         ),
+    //         layer_rect: Vector4::new(0.0, 0.0, width as f32, height as f32),
+    //     }
+    // }
 
-    pub fn from_atlas(atlas: &Texture2DAtlas, layer: u32) -> Self {
-        let (width, height) = atlas.get_layer_dimension(layer);
+    pub fn from_atlas(atlas: &TextureAtlas, name: &str) -> Self {
+        let (layer, rectangle) = atlas.rectangle(name);
         Self {
-            layer,
+            layer: *layer,
             translation: Vector3::new(0.0, 0.0, 0.0),
             scaling: Vector3::new(1.0, 1.0, 1.0),
             rotation: UnitQuaternion::from_euler_angles(0.0, 0.0, 0.0),
-            origin: Vector4::new(
-                (*width) as f32 * -0.5,
-                (*height) as f32 * -0.5,
-                (*width) as f32,
-                (*height) as f32,
+            origin: Vector2::new(
+                rectangle[2] as f32 * -0.5,
+                rectangle[3] as f32 * -0.5,
             ),
+            layer_rect: rectangle.clone(),
         }
     }
 
@@ -68,20 +67,28 @@ impl Sprite {
     }
 
     pub fn width(&self) -> f32 {
-        self.scaling[0] * self.origin[2]
+        self.scaling[0] * self.layer_rect[2]
     }
 
     pub fn height(&self) -> f32 {
-        self.scaling[1] * self.origin[3]
+        self.scaling[1] * self.layer_rect[3]
     }
 
     pub(super) fn as_instance(&self) -> SpriteInstance {
         SpriteInstance {
             layer: self.layer,
-            translation: self.translation.clone(),
+            translation: Vector3::new(
+                self.translation[0] + self.origin[0],
+                self.translation[1] + self.origin[1],
+                self.translation[2],
+            ),
             rotation: self.rotation.clone(),
-            scaling: self.scaling.clone(),
-            origin: self.origin.clone(),
+            scaling: Vector3::new(
+                self.width(),
+                self.height(),
+                self.scaling[2]
+            ),
+            layer_rect: self.layer_rect.clone()
         }
     }
 }

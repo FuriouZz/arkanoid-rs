@@ -1,16 +1,16 @@
-use super::RawTexture2D;
+use super::RawTexture;
 use crate::graphic::Gpu;
 use image::DynamicImage;
 
-pub struct Texture2D {
+pub struct Texture {
     view: wgpu::TextureView,
     width: u32,
     height: u32,
 }
 
-impl Texture2D {
+impl Texture {
     pub fn from_bytes(gpu: &mut Gpu, width: u32, height: u32, bytes: &[u8]) -> Self {
-        let texture = RawTexture2D::from_bytes(gpu, width, height, wgpu::TextureUsage::SAMPLED, bytes);
+        let texture = RawTexture::from_bytes(gpu, width, height, wgpu::TextureUsage::SAMPLED, bytes);
 
         // Create texture view
         let view = texture.as_raw().create_view(&wgpu::TextureViewDescriptor {

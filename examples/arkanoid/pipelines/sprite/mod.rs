@@ -325,7 +325,7 @@ pub struct SpriteInstance {
     translation: Vector3<f32>,
     scaling: Vector3<f32>,
     rotation: UnitQuaternion<f32>,
-    origin: Vector4<f32>,
+    layer_rect: Vector4<f32>,
 }
 
 unsafe impl bytemuck::Pod for SpriteInstance {}

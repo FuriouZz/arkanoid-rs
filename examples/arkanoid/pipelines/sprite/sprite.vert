@@ -9,7 +9,7 @@ layout(location = 2) in uint i_Layer;
 layout(location = 3) in vec3 i_Translation;
 layout(location = 4) in vec3 i_Scaling;
 layout(location = 5) in vec4 i_Rotation;
-layout(location = 6) in vec4 i_Origin;
+layout(location = 6) in vec4 i_LayerRect;
 
 // Ouput
 layout(location = 0) out vec2 f_TexCoord;
@@ -24,15 +24,15 @@ layout (set = 1, binding = 1) uniform Set1 {
 };
 
 void main() {
-    vec2 ratio = i_Origin.zw / u_AtlasSize.xy;
+    vec2 offset = i_LayerRect.xy / u_AtlasSize.xy;
+    vec2 ratio = i_LayerRect.zw / u_AtlasSize.xy;
 
-    f_TexCoord = v_TexCoord * ratio;
+    f_TexCoord = (v_TexCoord * ratio) + offset;
     f_Layer = i_Layer;
 
     vec3 pos = v_Position.xyz;
     // Scaling from vec3
-    pos *= vec3(i_Scaling.xy * i_Origin.zw, i_Scaling.z);
-    pos += vec3(i_Origin.xy, 0.0);
+    pos *= i_Scaling;
     // Rotate from quaternion
     // https://www.geeks3d.com/20141201/how-to-rotate-a-vertex-by-a-quaternion-in-glsl/
     pos = pos + 2.0 * cross(i_Rotation.xyz, cross(i_Rotation.xyz, pos) + i_Rotation.w * pos);

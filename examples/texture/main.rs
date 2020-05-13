@@ -1,5 +1,5 @@
 use fine::graphic::vertex_attribute::{position_texcoord::Vertex, VertexAttributeDescriptor};
-use fine::graphic::{wgpu, Texture2D};
+use fine::graphic::{wgpu, Texture};
 use fine::math::Matrix4;
 
 fn vertex(x: f32, y: f32, z: f32, u: f32, v: f32) -> Vertex {
@@ -57,7 +57,7 @@ impl fine::Scene for TextureExample {
         // >> See fine::graphic::Texture2D::from_image_data() for more details
         let img = image::load_from_memory(&include_bytes!("../arkanoid/assets/brick2.png")[..]).unwrap();
         let texture =
-            Texture2D::from_image(gpu, &img);
+            Texture::from_image(gpu, &img);
 
         // Create a sampler
         let sampler = gpu.device.create_sampler(&wgpu::SamplerDescriptor {

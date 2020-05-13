@@ -1,13 +1,13 @@
 use crate::graphic::Gpu;
 use image::DynamicImage;
 
-pub struct RawTexture2D {
+pub struct RawTexture {
     texture: wgpu::Texture,
     width: u32,
     height: u32,
 }
 
-impl RawTexture2D {
+impl RawTexture {
     pub fn from_bytes(gpu: &mut Gpu, width: u32, height: u32, usage: wgpu::TextureUsage, bytes: &[u8]) -> Self {
         // Create wgpu::Buffer
         let copy = gpu
