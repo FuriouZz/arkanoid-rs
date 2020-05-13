@@ -1,6 +1,7 @@
 use super::Brick;
 use crate::pipelines::SpritePipeline;
-use fine::graphic::{wgpu, Gpu, Texture2DAtlas};
+use fine::graphic::{wgpu, Gpu, Texture2DAtlas, Texture2D, TexturePacked};
+use fine::math::Vector4;
 
 pub struct Level {
     pub bricks: Vec<Brick>,
@@ -9,25 +10,19 @@ pub struct Level {
 
 impl Level {
     pub fn generate(width: u32, height: u32, gpu: &mut Gpu, sprite: &SpritePipeline) -> Self {
-        // let texture = Texture2D::from_image(gpu, &include_bytes!("../assets/brick2.png")[..]);
-        // let texture = Texture2D::from_images(gpu, &[
-        //     &include_bytes!("../assets/brick2.png")[..],
-        //     &include_bytes!("../assets/brick2.png")[..],
-        // ]);
-        let texture = Texture2DAtlas::from_packed_images(
-            gpu,
-            128,
-            43,
-            2,
-            &include_bytes!("../assets/brick3.png")[..],
-        );
-        let texture_binding = sprite.create_texture_binding(gpu, &texture);
+        let img = image::load_from_memory(&include_bytes!("../assets/brick3.png")[..]).unwrap();
+        let atlas = TexturePacked::from_image(&img)
+            .add_rect(Vector4::new(0, 0, 128, 43))
+            .add_rect(Vector4::new(0, 43, 128, 43))
+            .into_atlas(gpu);
+
+        let texture_binding = sprite.create_texture_binding(gpu, atlas.as_view(), atlas.width(), atlas.height());
 
         let bricks: Vec<Brick> = (0..width * height)
             .map(|index| {
                 let x = (index % width) as f32;
                 let y = f32::floor((index as f32) / (width as f32));
-                let mut brick = Brick::new(gpu, sprite, &texture);
+                let mut brick = Brick::new(&atlas);
                 brick.sprite.set_position(
                     x * brick.sprite.width() as f32,
                     y * brick.sprite.height() as f32,

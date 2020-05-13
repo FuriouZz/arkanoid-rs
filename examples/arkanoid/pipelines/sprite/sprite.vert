@@ -16,12 +16,17 @@ layout(location = 0) out vec2 f_TexCoord;
 layout(location = 1) flat out uint f_Layer;
 
 // Uniforms
-layout (set = 0, binding = 1) uniform Data {
+layout (set = 0, binding = 1) uniform Set0 {
     mat4 u_Projection;
+};
+layout (set = 1, binding = 1) uniform Set1 {
+    ivec2 u_AtlasSize;
 };
 
 void main() {
-    f_TexCoord = v_TexCoord;
+    vec2 ratio = i_Origin.zw / u_AtlasSize.xy;
+
+    f_TexCoord = v_TexCoord * ratio;
     f_Layer = i_Layer;
 
     vec3 pos = v_Position.xyz;

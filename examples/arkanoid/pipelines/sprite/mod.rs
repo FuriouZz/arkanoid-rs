@@ -88,6 +88,11 @@ impl SpritePipeline {
                     multisampled: false,
                 },
             })
+            .entry(wgpu::BindGroupLayoutEntry {
+                binding: 1,
+                visibility: wgpu::ShaderStage::VERTEX,
+                ty: wgpu::BindingType::UniformBuffer { dynamic: false },
+            })
             .build(&gpu.device);
 
         let pipeline_layout = gpu
@@ -207,21 +212,27 @@ impl SpritePipeline {
         }
     }
 
-    pub fn create_sprite(&self, texture: &graphic::Texture2DAtlas) -> Sprite {
-        Sprite::new(texture)
-    }
-
     pub fn create_texture_binding(
         &self,
         gpu: &graphic::Gpu,
-        texture: &graphic::Texture2DAtlas,
+        view: &wgpu::TextureView,
+        width: u32,
+        height: u32,
     ) -> wgpu::BindGroup {
+        let buffer = gpu.create_buffer(&[width, height], wgpu::BufferUsage::UNIFORM);
+
         gpu.device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: None,
             layout: self.instance_layout.get_layout(),
             bindings: &[wgpu::Binding {
                 binding: 0,
-                resource: wgpu::BindingResource::TextureView(texture.view()),
+                resource: wgpu::BindingResource::TextureView(view),
+            }, wgpu::Binding {
+                binding: 1,
+                resource: wgpu::BindingResource::Buffer {
+                    buffer: &buffer,
+                    range: 0..std::mem::size_of::<(u32, u32)>() as wgpu::BufferAddress,
+                }
             }],
         })
     }

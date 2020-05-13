@@ -47,11 +47,11 @@ impl Gpu {
     // Create a buffer
     pub fn create_buffer<A: bytemuck::Pod>(
         &self,
-        vertices: &[A],
+        bytes: &[A],
         usage: wgpu::BufferUsage,
     ) -> wgpu::Buffer {
         self.device
-            .create_buffer_with_data(bytemuck::cast_slice(vertices), usage)
+            .create_buffer_with_data(bytemuck::cast_slice(bytes), usage)
     }
 }
 

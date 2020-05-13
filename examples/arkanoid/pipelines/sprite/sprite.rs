@@ -1,5 +1,6 @@
-use fine::graphic::Texture2DAtlas;
+use fine::graphic::{Texture2D, Texture2DAtlas};
 use fine::math::{UnitQuaternion, Vector3, Vector4};
+use super::SpriteInstance;
 
 pub struct Sprite {
     layer: u32,
@@ -10,17 +11,34 @@ pub struct Sprite {
 }
 
 impl Sprite {
-    pub fn new(texture: &Texture2DAtlas) -> Self {
+    pub fn from_texture(texture: &Texture2D) -> Self {
+        let (width, height) = texture.get_dimension();
         Self {
             layer: 0,
             translation: Vector3::new(0.0, 0.0, 0.0),
             scaling: Vector3::new(1.0, 1.0, 1.0),
             rotation: UnitQuaternion::from_euler_angles(0.0, 0.0, 0.0),
             origin: Vector4::new(
-                texture.width() as f32 * -0.5,
-                texture.height() as f32 * -0.5,
-                texture.width() as f32,
-                texture.height() as f32,
+                width as f32 * -0.5,
+                height as f32 * -0.5,
+                width as f32,
+                height as f32,
+            ),
+        }
+    }
+
+    pub fn from_atlas(atlas: &Texture2DAtlas, layer: u32) -> Self {
+        let (width, height) = atlas.get_layer_dimension(layer);
+        Self {
+            layer,
+            translation: Vector3::new(0.0, 0.0, 0.0),
+            scaling: Vector3::new(1.0, 1.0, 1.0),
+            rotation: UnitQuaternion::from_euler_angles(0.0, 0.0, 0.0),
+            origin: Vector4::new(
+                (*width) as f32 * -0.5,
+                (*height) as f32 * -0.5,
+                (*width) as f32,
+                (*height) as f32,
             ),
         }
     }
@@ -57,8 +75,8 @@ impl Sprite {
         self.scaling[1] * self.origin[3]
     }
 
-    pub(super) fn as_instance(&self) -> super::SpriteInstance {
-        super::SpriteInstance {
+    pub(super) fn as_instance(&self) -> SpriteInstance {
+        SpriteInstance {
             layer: self.layer,
             translation: self.translation.clone(),
             rotation: self.rotation.clone(),

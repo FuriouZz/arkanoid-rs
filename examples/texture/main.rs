@@ -55,8 +55,9 @@ impl fine::Scene for TextureExample {
 
         // To use a texture into our shader, we need to create a texture view and a sampler
         // >> See fine::graphic::Texture2D::from_image_data() for more details
+        let img = image::load_from_memory(&include_bytes!("../arkanoid/assets/brick2.png")[..]).unwrap();
         let texture =
-            Texture2D::from_image(gpu, &include_bytes!("../arkanoid/assets/brick2.png")[..]);
+            Texture2D::from_image(gpu, &img);
 
         // Create a sampler
         let sampler = gpu.device.create_sampler(&wgpu::SamplerDescriptor {
@@ -104,7 +105,7 @@ impl fine::Scene for TextureExample {
             // Assign sampler
             1 => Some(wgpu::BindingResource::Sampler(&sampler)),
             // Assign texture view
-            2 => Some(wgpu::BindingResource::TextureView(texture.view())),
+            2 => Some(wgpu::BindingResource::TextureView(texture.as_view())),
             _ => None,
         });
 
