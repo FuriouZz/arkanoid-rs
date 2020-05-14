@@ -26,6 +26,7 @@ pub struct SpritePipeline {
     constant_group: wgpu::BindGroup,
     instance_layout: graphic::BindingLayout,
     projection_buffer: wgpu::Buffer,
+    depth_view: wgpu::TextureView,
 }
 
 impl SpritePipeline {
@@ -64,6 +65,22 @@ impl SpritePipeline {
             lod_min_clamp: 0.,
             lod_max_clamp: 100.,
         });
+
+        let depth_texture = gpu.device.create_texture(&wgpu::TextureDescriptor {
+            size: wgpu::Extent3d {
+                width: 865,
+                height: 754,
+                depth: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Depth32Float,
+            usage: wgpu::TextureUsage::OUTPUT_ATTACHMENT,
+            label: None,
+        });
+
+        let depth_view = depth_texture.create_default_view();
 
         let constant_binding = graphic::BindingDescriptor::new()
             // Texture sampler
@@ -132,7 +149,15 @@ impl SpritePipeline {
                     alpha_blend: graphic::blend::TRANSPARENT,
                     write_mask: wgpu::ColorWrite::ALL,
                 }],
-                depth_stencil_state: None,
+                depth_stencil_state: Some(wgpu::DepthStencilStateDescriptor {
+                    format: wgpu::TextureFormat::Depth32Float,
+                    depth_write_enabled: true,
+                    depth_compare: wgpu::CompareFunction::LessEqual,
+                    stencil_front: wgpu::StencilStateFaceDescriptor::IGNORE,
+                    stencil_back: wgpu::StencilStateFaceDescriptor::IGNORE,
+                    stencil_read_mask: 0,
+                    stencil_write_mask: 0,
+                }),
                 vertex_state: wgpu::VertexStateDescriptor {
                     index_format: wgpu::IndexFormat::Uint16,
                     vertex_buffers: &[
@@ -211,6 +236,7 @@ impl SpritePipeline {
             constant_group,
             instance_layout,
             projection_buffer,
+            depth_view,
         }
     }
 
@@ -303,7 +329,15 @@ impl SpritePipeline {
                         a: 1.,
                     },
                 }],
-                depth_stencil_attachment: None,
+                depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachmentDescriptor {
+                    attachment: &self.depth_view,
+                    depth_load_op: wgpu::LoadOp::Clear,
+                    depth_store_op: wgpu::StoreOp::Store,
+                    stencil_load_op: wgpu::LoadOp::Clear,
+                    stencil_store_op: wgpu::StoreOp::Store,
+                    clear_depth: 1.0,
+                    clear_stencil: 0,
+                }),
             });
 
             pass.set_pipeline(&self.pipeline);

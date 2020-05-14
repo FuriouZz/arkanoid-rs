@@ -24,7 +24,7 @@ impl fine::Scene for ArkanoidScene {
         Self {
             level,
             sprite,
-            camera: Camera::orthographic(-1.0, 1.0, -1.0, 1.0, 0.0, 100.0),
+            camera: Camera::orthographic(-1.0, 1.0, -1.0, 1.0, -100.0, 100.0),
         }
     }
 
@@ -55,6 +55,7 @@ impl fine::Scene for ArkanoidScene {
         sprite.transform.scale(f32::cos(fine::now() as f32*0.001).abs().max(0.0001));
         sprite.transform.rotate_z(fine::now() as f32*0.00001);
         sprite.transform.translate(f32::cos(fine::now() as f32*0.001) * 1f32, 0.0, 0.0);
+        sprite.transform.translation_mut()[2] = 1.0;
 
         let instances: Vec<&Sprite> = self
             .level
