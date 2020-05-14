@@ -14,12 +14,7 @@ impl Level {
         let img = image::load_from_memory(&include_bytes!("../assets/brick3.png")[..]).unwrap();
         let mut atlas = TextureAtlas::new(gpu, 128, 86, 1);
         atlas.append_image(gpu, &img, |atlas| {
-            atlas.add(
-                "blue",
-                0,
-                Vector4::new(0, 0, 128, 43),
-                None,
-            );
+            atlas.add("blue", 0, Vector4::new(0, 0, 128, 43), None);
             atlas.add(
                 "green",
                 0,
@@ -29,7 +24,8 @@ impl Level {
         });
 
         let (w, h, ..) = atlas.dimensions();
-        let texture_binding = sprite.create_texture_binding(gpu, atlas.as_view(), w as f32, h as f32);
+        let texture_binding =
+            sprite.create_texture_binding(gpu, atlas.as_view(), w as f32, h as f32);
 
         let atlas = Rc::new(atlas);
 
@@ -40,13 +36,15 @@ impl Level {
                 let mut brick = Brick::new(atlas.clone());
 
                 if index % 2 == 0 {
-                    brick.sprite.set_frame("green");
+                    brick.clip.set_frame("green");
                 }
 
-                brick.sprite.set_position(
-                    x * brick.sprite.width() as f32,
-                    y * brick.sprite.height() as f32,
+                brick.clip.sprite.transform.translate(
+                    x * brick.clip.sprite.width() as f32,
+                    y * brick.clip.sprite.height() as f32,
+                    0.0,
                 );
+
                 brick
             })
             .collect();

@@ -51,15 +51,16 @@ impl fine::Scene for ArkanoidScene {
     }
     fn on_draw(&mut self, frame: &mut fine::Frame) {
         let mut b = self.level.bricks.get_mut(2).unwrap();
-        b.sprite.scale(f32::cos(fine::now() as f32*0.001).abs().max(0.0001));
-        b.sprite.rotate(fine::now() as f32*0.001);
-        // b.sprite.set_position(f32::cos(fine::now() as f32*0.001) * 100f32, 0.0);
+        let sprite = &mut b.clip.sprite;
+        sprite.transform.scale(f32::cos(fine::now() as f32*0.001).abs().max(0.0001));
+        sprite.transform.rotate_z(fine::now() as f32*0.00001);
+        sprite.transform.translate(f32::cos(fine::now() as f32*0.001) * 1f32, 0.0, 0.0);
 
         let instances: Vec<&Sprite> = self
             .level
             .bricks
             .iter_mut()
-            .map(|brick| brick.sprite.sprite())
+            .map(|brick| &brick.clip.sprite)
             .collect();
 
         self.sprite.draw(

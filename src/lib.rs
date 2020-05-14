@@ -12,6 +12,8 @@ pub use scene::Scene;
 pub use window::*;
 mod frame;
 pub use frame::Frame;
+mod transform;
+pub use transform::Transform;
 
 async fn start_async<S: 'static + Scene>(graphic_options: graphic::GpuOptions) {
     #[cfg(target_arch = "wasm32")]

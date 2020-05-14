@@ -1,27 +1,21 @@
+use super::SpriteInstance;
 use fine::graphic::{Texture, TextureAtlas};
 use fine::math::{UnitQuaternion, Vector2, Vector3, Vector4};
-use super::SpriteInstance;
+use fine::Transform;
 
 pub struct Sprite {
     layer: u32,
-    translation: Vector3<f32>,
-    scaling: Vector3<f32>,
-    rotation: UnitQuaternion<f32>,
-    origin: Vector2<f32>,
     layer_rect: Vector4<f32>,
+    pub transform: Transform,
+    pub origin: Vector2<f32>,
 }
 
 impl Sprite {
     pub fn from_frame(layer: u32, frame: &Vector4<f32>) -> Self {
         Self {
             layer,
-            translation: Vector3::new(0.0, 0.0, 0.0),
-            scaling: Vector3::new(1.0, 1.0, 1.0),
-            rotation: UnitQuaternion::from_euler_angles(0.0, 0.0, 0.0),
-            origin: Vector2::new(
-                0.5,
-                0.5,
-            ),
+            transform: Transform::new(),
+            origin: Vector2::new(0.5, 0.5),
             layer_rect: frame.clone(),
         }
     }
@@ -41,48 +35,31 @@ impl Sprite {
         self.set_frame(*layer, frame);
     }
 
-    pub fn set_origin(&mut self, x: f32, y: f32) {
-        self.origin[0] = x;
-        self.origin[1] = y;
-    }
-
-    pub fn set_position(&mut self, x: f32, y: f32) {
-        self.translation[0] = x;
-        self.translation[1] = y;
-    }
-
-    pub fn scale(&mut self, s: f32) {
-        self.scaling[0] = s;
-        self.scaling[1] = s;
-    }
-
-    pub fn rotate(&mut self, rad: f32) {
-        self.rotation = UnitQuaternion::from_euler_angles(0.0, 0.0, rad);
-    }
-
     pub fn x(&self) -> f32 {
-        self.translation[0]
+        self.transform.translation()[0]
     }
 
     pub fn y(&self) -> f32 {
-        self.translation[1]
+        self.transform.translation()[1]
     }
 
     pub fn width(&self) -> f32 {
-        self.scaling[0] * self.layer_rect[2]
+        self.transform.scaling()[0] * self.layer_rect[2]
     }
 
     pub fn height(&self) -> f32 {
-        self.scaling[1] * self.layer_rect[3]
+        self.transform.scaling()[1] * self.layer_rect[3]
     }
 
     pub(super) fn as_instance(&self) -> SpriteInstance {
+        let (translation, rotation, scaling) = self.transform.decompose();
+
         SpriteInstance {
             layer: Vector3::new(self.layer as f32, self.origin[0], self.origin[1]),
             layer_rect: self.layer_rect.clone(),
-            translation: self.translation.clone(),
-            scaling: self.scaling.clone(),
-            rotation: self.rotation.clone(),
+            translation,
+            scaling,
+            rotation,
         }
     }
 }
