@@ -1,6 +1,6 @@
 use super::Sprite;
-use std::rc::Rc;
 use fine::graphic::TextureAtlas;
+use std::rc::Rc;
 
 pub struct SpriteClip {
     pub sprite: Sprite,
@@ -10,10 +10,7 @@ pub struct SpriteClip {
 impl SpriteClip {
     pub fn new(name: &str, atlas: Rc<TextureAtlas>) -> Self {
         let sprite = Sprite::from_atlas(name, atlas.as_ref());
-        Self {
-            sprite,
-            atlas,
-        }
+        Self { sprite, atlas }
     }
 
     pub fn set_frame(&mut self, name: &str) {

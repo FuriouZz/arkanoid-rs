@@ -129,8 +129,14 @@ impl TextureAtlas {
         );
     }
 
-    pub fn append_bytes<F>(&mut self, gpu: &mut Gpu, bytes: &[u8], width: u32, height: u32, mut f: F)
-    where
+    pub fn append_bytes<F>(
+        &mut self,
+        gpu: &mut Gpu,
+        bytes: &[u8],
+        width: u32,
+        height: u32,
+        mut f: F,
+    ) where
         F: FnMut(&mut TextureAtlasFromBytes),
     {
         let texture =

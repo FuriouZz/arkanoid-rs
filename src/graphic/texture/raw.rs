@@ -8,7 +8,13 @@ pub struct RawTexture {
 }
 
 impl RawTexture {
-    pub fn from_bytes(gpu: &mut Gpu, width: u32, height: u32, usage: wgpu::TextureUsage, bytes: &[u8]) -> Self {
+    pub fn from_bytes(
+        gpu: &mut Gpu,
+        width: u32,
+        height: u32,
+        usage: wgpu::TextureUsage,
+        bytes: &[u8],
+    ) -> Self {
         // Create wgpu::Buffer
         let copy = gpu
             .device

@@ -10,7 +10,8 @@ pub struct Texture {
 
 impl Texture {
     pub fn from_bytes(gpu: &mut Gpu, width: u32, height: u32, bytes: &[u8]) -> Self {
-        let texture = RawTexture::from_bytes(gpu, width, height, wgpu::TextureUsage::SAMPLED, bytes);
+        let texture =
+            RawTexture::from_bytes(gpu, width, height, wgpu::TextureUsage::SAMPLED, bytes);
 
         // Create texture view
         let view = texture.as_raw().create_view(&wgpu::TextureViewDescriptor {

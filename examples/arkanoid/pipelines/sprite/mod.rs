@@ -1,11 +1,11 @@
 use fine::graphic;
 use fine::graphic::vertex_attribute::{position_texcoord::Vertex, VertexAttributeDescriptor};
 use fine::graphic::wgpu;
-mod sprite;
 mod clip;
+mod sprite;
+pub use clip::SpriteClip;
 use fine::math::{Matrix4, UnitQuaternion, Vector3, Vector4};
 pub use sprite::Sprite;
-pub use clip::SpriteClip;
 
 fn vertex(x: f32, y: f32, z: f32, u: f32, v: f32) -> Vertex {
     Vertex {
@@ -179,25 +179,25 @@ impl SpritePipeline {
                                 // Layer Rect
                                 wgpu::VertexAttributeDescriptor {
                                     format: wgpu::VertexFormat::Float4,
-                                    offset: 3*4,
+                                    offset: 3 * 4,
                                     shader_location: 3,
                                 },
                                 // Translation
                                 wgpu::VertexAttributeDescriptor {
                                     format: wgpu::VertexFormat::Float3,
-                                    offset: 3*4 + 4*4,
+                                    offset: 3 * 4 + 4 * 4,
                                     shader_location: 4,
                                 },
                                 // Scaling
                                 wgpu::VertexAttributeDescriptor {
                                     format: wgpu::VertexFormat::Float3,
-                                    offset: 3*4 + 4*4 + 3*4,
+                                    offset: 3 * 4 + 4 * 4 + 3 * 4,
                                     shader_location: 5,
                                 },
                                 // Rotation
                                 wgpu::VertexAttributeDescriptor {
                                     format: wgpu::VertexFormat::Float4,
-                                    offset: 3*4 + 4*4 + 3*4 + 3*4,
+                                    offset: 3 * 4 + 4 * 4 + 3 * 4 + 3 * 4,
                                     shader_location: 6,
                                 },
                             ],
@@ -252,16 +252,19 @@ impl SpritePipeline {
         gpu.device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: None,
             layout: self.instance_layout.get_layout(),
-            bindings: &[wgpu::Binding {
-                binding: 0,
-                resource: wgpu::BindingResource::TextureView(view),
-            }, wgpu::Binding {
-                binding: 1,
-                resource: wgpu::BindingResource::Buffer {
-                    buffer: &buffer,
-                    range: 0..std::mem::size_of::<(f32, f32)>() as wgpu::BufferAddress,
-                }
-            }],
+            bindings: &[
+                wgpu::Binding {
+                    binding: 0,
+                    resource: wgpu::BindingResource::TextureView(view),
+                },
+                wgpu::Binding {
+                    binding: 1,
+                    resource: wgpu::BindingResource::Buffer {
+                        buffer: &buffer,
+                        range: 0..std::mem::size_of::<(f32, f32)>() as wgpu::BufferAddress,
+                    },
+                },
+            ],
         })
     }
 

@@ -19,7 +19,7 @@ impl fine::Scene for ArkanoidScene {
     {
         let gpu = frame.gpu();
         let sprite = SpritePipeline::new(gpu);
-        let level = entities::Level::generate(10, 10, gpu, &sprite);
+        let level = entities::Level::generate(2, 2, gpu, &sprite);
 
         Self {
             level,
@@ -50,18 +50,11 @@ impl fine::Scene for ArkanoidScene {
         }
     }
     fn on_draw(&mut self, frame: &mut fine::Frame) {
-        let mut b = self.level.bricks.get_mut(2).unwrap();
-        let sprite = &mut b.clip.sprite;
-        sprite.transform.scale(f32::cos(fine::now() as f32*0.001).abs().max(0.0001));
-        sprite.transform.rotate_z(fine::now() as f32*0.00001);
-        sprite.transform.translate(f32::cos(fine::now() as f32*0.001) * 1f32, 0.0, 0.0);
-        sprite.transform.translation_mut()[2] = 1.0;
-
         let instances: Vec<&Sprite> = self
             .level
             .bricks
             .iter_mut()
-            .map(|brick| &brick.clip.sprite)
+            .map(|brick| &brick.sprite)
             .collect();
 
         self.sprite.draw(

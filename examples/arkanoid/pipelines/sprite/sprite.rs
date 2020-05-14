@@ -3,6 +3,7 @@ use fine::graphic::{Texture, TextureAtlas};
 use fine::math::{UnitQuaternion, Vector2, Vector3, Vector4};
 use fine::Transform;
 
+#[derive(Debug)]
 pub struct Sprite {
     layer: u32,
     layer_rect: Vector4<f32>,
