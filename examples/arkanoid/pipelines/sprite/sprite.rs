@@ -1,4 +1,4 @@
-use super::SpriteInstance;
+use super::{AsInstance, Instance};
 use fine::graphic::{Texture, TextureAtlas};
 use fine::math::{UnitQuaternion, Vector2, Vector3, Vector4};
 use fine::Transform;
@@ -14,26 +14,23 @@ pub struct Sprite {
 impl Sprite {
     pub fn from_frame(layer: u32, frame: &Vector4<f32>) -> Self {
         Self {
-            layer,
+            layer: 0,
             transform: Transform::new(),
             origin: Vector2::new(0.5, 0.5),
             layer_rect: frame.clone(),
         }
     }
 
+    pub fn from_texture(texture: &Texture) -> Self {
+        Self::from_frame(
+            0,
+            &Vector4::new(0.0, 0.0, texture.width() as f32, texture.height() as f32),
+        )
+    }
+
     pub fn from_atlas(name: &str, atlas: &TextureAtlas) -> Self {
         let (layer, frame) = atlas.frame(name);
         Self::from_frame(*layer, frame)
-    }
-
-    pub fn set_frame(&mut self, layer: u32, frame: &Vector4<f32>) {
-        self.layer = layer;
-        self.layer_rect = frame.clone();
-    }
-
-    pub fn set_frame_from_atlas(&mut self, name: &str, atlas: &TextureAtlas) {
-        let (layer, frame) = atlas.frame(name);
-        self.set_frame(*layer, frame);
     }
 
     pub fn x(&self) -> f32 {
@@ -51,11 +48,13 @@ impl Sprite {
     pub fn height(&self) -> f32 {
         self.transform.scaling()[1] * self.layer_rect[3]
     }
+}
 
-    pub(super) fn as_instance(&self) -> SpriteInstance {
+impl AsInstance for &Sprite {
+    fn as_instance(&self) -> Instance {
         let (translation, rotation, scaling) = self.transform.decompose();
 
-        SpriteInstance {
+        Instance {
             layer: Vector3::new(self.layer as f32, self.origin[0], self.origin[1]),
             layer_rect: self.layer_rect.clone(),
             translation,

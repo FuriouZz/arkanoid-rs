@@ -5,6 +5,11 @@ pub use texture::Texture;
 mod raw;
 pub use raw::RawTexture;
 
+pub trait AsTextureView {
+    fn view_rect(&self, frame: Option<String>) -> (u32, nalgebra::Vector4<f32>);
+    fn as_view(&self) -> &wgpu::TextureView;
+}
+
 pub fn create_texture_color(
     color: u32,
     width: u32,

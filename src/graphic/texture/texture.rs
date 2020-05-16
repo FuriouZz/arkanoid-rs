@@ -50,7 +50,22 @@ impl Texture {
         (self.width, self.height)
     }
 
-    pub fn as_view(&self) -> &wgpu::TextureView {
+}
+
+impl super::AsTextureView for Texture {
+    fn view_rect(&self, name: Option<String>) -> (u32, nalgebra::Vector4<f32>) {
+        (0, nalgebra::Vector4::new(0.0, 0.0, self.width as f32, self.height as f32))
+    }
+    fn as_view(&self) -> &wgpu::TextureView {
+        &self.view
+    }
+}
+
+impl super::AsTextureView for &Texture {
+    fn view_rect(&self, name: Option<String>) -> (u32, nalgebra::Vector4<f32>) {
+        (0, nalgebra::Vector4::new(0.0, 0.0, self.width as f32, self.height as f32))
+    }
+    fn as_view(&self) -> &wgpu::TextureView {
         &self.view
     }
 }

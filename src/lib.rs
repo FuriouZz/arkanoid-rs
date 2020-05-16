@@ -1,4 +1,3 @@
-#![deny(unused_results)]
 #![allow(unused)]
 
 mod context;
