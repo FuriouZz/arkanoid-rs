@@ -14,7 +14,7 @@ pub struct Sprite {
 impl Sprite {
     pub fn from_frame(layer: u32, layer_rect: Vector4<f32>) -> Self {
         Self {
-            layer,
+            layer: 0,
             transform: Transform::new(),
             origin: Vector2::new(0.5, 0.5),
             layer_rect,
