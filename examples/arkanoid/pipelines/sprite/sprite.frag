@@ -13,5 +13,5 @@ layout(set = 1, binding = 0) uniform texture2DArray t_Color;
 
 void main() {
     vec4 color = texture(sampler2DArray(t_Color, s_Color), vec3(f_TexCoord, f_Layer));
-    o_Color = vec4(color.rgb, 1.);
+    o_Color = vec4(color.rgb * color.a, color.a);
 }

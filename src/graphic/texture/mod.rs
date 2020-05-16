@@ -16,7 +16,7 @@ pub fn create_texture_color(
             std::iter::once((color & 0xFF) as u8)
                 .chain(std::iter::once((color >> 8 & 0xFF) as u8))
                 .chain(std::iter::once((color >> 16 & 0xFF) as u8))
-                .chain(std::iter::once(1))
+                .chain(std::iter::once(0xFF))
         })
         .collect();
 

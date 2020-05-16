@@ -19,7 +19,7 @@ impl fine::Scene for ArkanoidScene {
     {
         let sprite = SpritePipeline::new(&mut frame);
         let gpu = frame.gpu();
-        let level = entities::Level::generate(8, 10, gpu, &sprite);
+        let level = entities::Level::generate(8, 11, gpu, &sprite);
 
         Self {
             level,

@@ -27,7 +27,7 @@ void main() {
     vec2 offset = i_LayerRect.xy / u_AtlasSize.xy;
     vec2 ratio = i_LayerRect.zw / u_AtlasSize.xy;
 
-    f_TexCoord = (v_TexCoord * ratio) + offset;
+    f_TexCoord = (vec2(v_TexCoord.x, 1.0 - v_TexCoord.y) * ratio) + offset;
     f_Layer = i_LayerAndOrigin.x;
 
     vec3 pos = v_Position.xyz - vec3(i_LayerAndOrigin.yz, 0.0);
