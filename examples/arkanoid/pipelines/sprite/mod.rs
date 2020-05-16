@@ -30,7 +30,10 @@ pub struct SpritePipeline {
 }
 
 impl SpritePipeline {
-    pub fn new(gpu: &mut graphic::Gpu) -> Self {
+    pub fn new(frame: &mut fine::Frame) -> Self {
+        let (frame_width, frame_height) = frame.dimensions();
+        let gpu = frame.gpu();
+
         let vertices: Vec<Vertex> = vec![
             vertex(0.0, 0.0, 0., 0.0, 0.0),
             vertex(0.0, 1.0, 0., 0.0, 1.0),
@@ -59,8 +62,8 @@ impl SpritePipeline {
             address_mode_v: wgpu::AddressMode::ClampToEdge,
             address_mode_w: wgpu::AddressMode::ClampToEdge,
             mag_filter: wgpu::FilterMode::Linear,
-            min_filter: wgpu::FilterMode::Nearest,
-            mipmap_filter: wgpu::FilterMode::Nearest,
+            min_filter: wgpu::FilterMode::Linear,
+            mipmap_filter: wgpu::FilterMode::Linear,
             compare: wgpu::CompareFunction::Undefined,
             lod_min_clamp: 0.,
             lod_max_clamp: 100.,
@@ -68,8 +71,8 @@ impl SpritePipeline {
 
         let depth_texture = gpu.device.create_texture(&wgpu::TextureDescriptor {
             size: wgpu::Extent3d {
-                width: 865,
-                height: 754,
+                width: frame_width,
+                height: frame_height,
                 depth: 1,
             },
             mip_level_count: 1,
@@ -98,6 +101,7 @@ impl SpritePipeline {
             .build(&gpu.device);
 
         let instance_layout = graphic::BindingDescriptor::new()
+            // Texture
             .entry(wgpu::BindGroupLayoutEntry {
                 binding: 0,
                 visibility: wgpu::ShaderStage::FRAGMENT,
@@ -107,9 +111,10 @@ impl SpritePipeline {
                     multisampled: false,
                 },
             })
+            // Atlas size
             .entry(wgpu::BindGroupLayoutEntry {
                 binding: 1,
-                visibility: wgpu::ShaderStage::VERTEX,
+                visibility: wgpu::ShaderStage::VERTEX | wgpu::ShaderStage::FRAGMENT,
                 ty: wgpu::BindingType::UniformBuffer { dynamic: false },
             })
             .build(&gpu.device);
@@ -240,6 +245,27 @@ impl SpritePipeline {
         }
     }
 
+    pub fn resize(&mut self, frame: &mut fine::Frame) {
+        let (frame_width, frame_height) = frame.dimensions();
+        let gpu = frame.gpu();
+
+        let depth_texture = gpu.device.create_texture(&wgpu::TextureDescriptor {
+            size: wgpu::Extent3d {
+                width: frame_width,
+                height: frame_height,
+                depth: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Depth32Float,
+            usage: wgpu::TextureUsage::OUTPUT_ATTACHMENT,
+            label: None,
+        });
+
+        self.depth_view = depth_texture.create_default_view();
+    }
+
     pub fn create_texture_binding(
         &self,
         gpu: &graphic::Gpu,
@@ -270,13 +296,12 @@ impl SpritePipeline {
 
     pub fn draw(
         &mut self,
-        frame: &mut fine::Frame,
+        gpu: &mut graphic::Gpu,
+        attachment: &wgpu::TextureView,
         camera: &crate::camera::Camera,
         binding: &wgpu::BindGroup,
         instances: &[&Sprite],
     ) {
-        let (gpu, attachment) = frame.target();
-
         // Update projection matrix
         {
             let projection_buffer = gpu.create_buffer(
@@ -323,7 +348,7 @@ impl SpritePipeline {
                 color_attachments: &[wgpu::RenderPassColorAttachmentDescriptor {
                     attachment,
                     resolve_target: None,
-                    load_op: wgpu::LoadOp::Clear,
+                    load_op: wgpu::LoadOp::Load,
                     store_op: wgpu::StoreOp::Store,
                     clear_color: wgpu::Color {
                         r: 0.,

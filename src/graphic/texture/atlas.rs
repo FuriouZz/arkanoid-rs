@@ -64,6 +64,18 @@ impl TextureAtlas {
             .expect("Rectangle does not exist")
     }
 
+    pub fn width(&self) -> u32 {
+        self.width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.height
+    }
+
+    pub fn layer_count(&self) -> u32 {
+        self.layer_count
+    }
+
     pub fn dimensions(&self) -> (u32, u32, u32) {
         (self.width, self.height, self.layer_count)
     }

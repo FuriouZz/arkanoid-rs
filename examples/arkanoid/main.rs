@@ -17,24 +17,26 @@ impl fine::Scene for ArkanoidScene {
     where
         Self: Sized,
     {
+        let sprite = SpritePipeline::new(&mut frame);
         let gpu = frame.gpu();
-        let sprite = SpritePipeline::new(gpu);
-        let level = entities::Level::generate(2, 2, gpu, &sprite);
+        let level = entities::Level::generate(8, 10, gpu, &sprite);
 
         Self {
             level,
             sprite,
-            camera: Camera::orthographic(-1.0, 1.0, -1.0, 1.0, -100.0, 100.0),
+            camera: Camera::orthographic(-1.0, 1.0, -1.0, 1.0, 0.0, 100.0),
         }
     }
 
     fn on_start(&mut self, _frame: &mut fine::Frame) {
         fine::log!("Arkanoid initialized 🥰");
     }
-    fn on_event(&mut self, e: fine::event::Event) {
+    fn on_event(&mut self, frame: &mut fine::Frame, e: fine::event::Event) {
         match e {
             fine::event::Event::Resize(width, height) => {
                 fine::log!("Resolution {}x{}", width, height);
+
+                // Update orthographic projection
                 let right = width as f32 * 0.5;
                 let top = height as f32 * 0.5;
                 let lens = &mut self.camera.lens;
@@ -45,24 +47,15 @@ impl fine::Scene for ArkanoidScene {
                     }
                     _ => {}
                 }
+
+                // Resize depth map
+                self.sprite.resize(frame);
             }
             _ => {}
         }
     }
     fn on_draw(&mut self, frame: &mut fine::Frame) {
-        let instances: Vec<&Sprite> = self
-            .level
-            .bricks
-            .iter_mut()
-            .map(|brick| &brick.sprite)
-            .collect();
-
-        self.sprite.draw(
-            frame,
-            &self.camera,
-            &self.level.texture_binding,
-            instances.as_slice(),
-        );
+        self.level.draw(frame, &mut self.sprite, &self.camera);
     }
 }
 

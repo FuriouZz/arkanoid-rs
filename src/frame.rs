@@ -12,6 +12,10 @@ impl<'a> Frame<'a> {
         self.surface.window.height()
     }
 
+    pub fn dimensions(&self) -> (u32, u32) {
+        (self.surface.window.width(), self.surface.window.height())
+    }
+
     pub fn gpu(&mut self) -> &mut crate::graphic::Gpu {
         self.gpu
     }

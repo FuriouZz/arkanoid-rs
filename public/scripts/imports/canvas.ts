@@ -36,10 +36,10 @@ export class Canvas {
   }
 
   resize(width: number, height: number) {
-    this.$canvas.width = width
-    this.$canvas.height = height
-    this.$canvas.style.width = `${this.$canvas.width}px`
-    this.$canvas.style.height = `${this.$canvas.height}px`
+    this.$canvas.width = width * window.devicePixelRatio
+    this.$canvas.height = height * window.devicePixelRatio
+    this.$canvas.style.width = `${width}px`
+    this.$canvas.style.height = `${height}px`
   }
 
 }

@@ -31,6 +31,12 @@ impl Context {
             }
             _ => {}
         }
-        self.scene.on_event(e);
+        self.scene.on_event(
+            &mut super::Frame {
+                gpu: &mut self.gpu,
+                surface: &mut self.surface,
+            },
+            e,
+        );
     }
 }
