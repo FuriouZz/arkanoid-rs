@@ -1,5 +1,5 @@
 use fine::graphic::vertex_attribute::{position_texcoord::Vertex, VertexAttributeDescriptor};
-use fine::graphic::{wgpu, Texture, AsTextureView};
+use fine::graphic::{wgpu, AsTextureView, Texture};
 use fine::math::Matrix4;
 
 fn vertex(x: f32, y: f32, z: f32, u: f32, v: f32) -> Vertex {
@@ -55,8 +55,7 @@ impl fine::Scene for TextureExample {
 
         // To use a texture into our shader, we need to create a texture view and a sampler
         // >> See fine::graphic::Texture2D::from_image_data() for more details
-        let img =
-            image::load_from_memory(&include_bytes!("texture.png")[..]).unwrap();
+        let img = image::load_from_memory(&include_bytes!("texture.png")[..]).unwrap();
         let texture = Texture::from_image(gpu, &img);
 
         // Create a sampler

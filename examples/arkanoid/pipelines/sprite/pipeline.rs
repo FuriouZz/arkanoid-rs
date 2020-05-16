@@ -1,8 +1,8 @@
+use super::{AsInstance, Instance};
 use fine::graphic;
 use fine::graphic::vertex_attribute::{position_texcoord::Vertex, VertexAttributeDescriptor};
 use fine::graphic::wgpu;
 use fine::math::{Matrix4, UnitQuaternion, Vector3, Vector4};
-use super::{Instance, AsInstance};
 
 fn vertex(x: f32, y: f32, z: f32, u: f32, v: f32) -> Vertex {
     Vertex {
@@ -122,8 +122,10 @@ impl SpritePipeline {
                 bind_group_layouts: &[constant_binding.get_layout(), instance_layout.get_layout()],
             });
 
-        let vertex_module = gpu.create_shader_module(&include_bytes!("../../assets/shaders/sprite.vert.spv")[..]);
-        let fragment_module = gpu.create_shader_module(&include_bytes!("../../assets/shaders/sprite.frag.spv")[..]);
+        let vertex_module =
+            gpu.create_shader_module(&include_bytes!("../../assets/shaders/sprite.vert.spv")[..]);
+        let fragment_module =
+            gpu.create_shader_module(&include_bytes!("../../assets/shaders/sprite.frag.spv")[..]);
 
         let pipeline = gpu
             .device
@@ -297,7 +299,7 @@ impl SpritePipeline {
         attachment: &wgpu::TextureView,
         camera: &crate::camera::Camera,
         binding: &wgpu::BindGroup,
-        instances: impl Iterator<Item=impl AsInstance>,
+        instances: impl Iterator<Item = impl AsInstance>,
     ) {
         // Update projection matrix
         {

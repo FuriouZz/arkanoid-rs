@@ -6,7 +6,6 @@ mod raw;
 pub use raw::RawTexture;
 
 pub trait AsTextureView {
-    fn view_rect(&self, frame: Option<String>) -> (u32, nalgebra::Vector4<f32>);
     fn as_view(&self) -> &wgpu::TextureView;
 }
 

@@ -29,8 +29,8 @@ impl Sprite {
     }
 
     pub fn from_atlas(name: &str, atlas: &TextureAtlas) -> Self {
-        let (layer, frame) = atlas.frame(name);
-        Self::from_frame(*layer, frame.clone())
+        let (layer, frame) = atlas.frame(name).expect("No frame found");
+        Self::from_frame(layer, frame)
     }
 
     pub fn x(&self) -> f32 {

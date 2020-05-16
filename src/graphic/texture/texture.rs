@@ -49,22 +49,15 @@ impl Texture {
     pub fn get_dimension(&self) -> (u32, u32) {
         (self.width, self.height)
     }
-
 }
 
 impl super::AsTextureView for Texture {
-    fn view_rect(&self, name: Option<String>) -> (u32, nalgebra::Vector4<f32>) {
-        (0, nalgebra::Vector4::new(0.0, 0.0, self.width as f32, self.height as f32))
-    }
     fn as_view(&self) -> &wgpu::TextureView {
         &self.view
     }
 }
 
 impl super::AsTextureView for &Texture {
-    fn view_rect(&self, name: Option<String>) -> (u32, nalgebra::Vector4<f32>) {
-        (0, nalgebra::Vector4::new(0.0, 0.0, self.width as f32, self.height as f32))
-    }
     fn as_view(&self) -> &wgpu::TextureView {
         &self.view
     }

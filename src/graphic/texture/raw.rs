@@ -55,11 +55,7 @@ impl RawTexture {
             },
         );
 
-        Self {
-            raw,
-            width,
-            height,
-        }
+        Self { raw, width, height }
     }
 
     pub fn from_image(gpu: &mut Gpu, usage: wgpu::TextureUsage, img: &DynamicImage) -> Self {

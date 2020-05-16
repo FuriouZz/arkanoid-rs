@@ -1,5 +1,5 @@
 use super::{AsInstance, Instance};
-use fine::graphic::{TextureAtlas, AsTextureView};
+use fine::graphic::TextureAtlas;
 use fine::math::{UnitQuaternion, Vector2, Vector3, Vector4};
 use fine::Transform;
 use std::rc::Rc;
@@ -14,7 +14,7 @@ pub struct MovieClip {
 
 impl MovieClip {
     pub fn new(frame: impl Into<String>, texture: Rc<TextureAtlas>) -> Self {
-        let (layer, layer_rect) = texture.view_rect(Some(frame.into()));
+        let (layer, layer_rect) = texture.frame(frame).expect("No frame found");
         Self {
             layer,
             layer_rect,
@@ -29,8 +29,8 @@ impl MovieClip {
         self.set_frame(frame);
     }
 
-    pub fn set_frame(&mut self, name: impl Into<String>) {
-        let (layer, layer_rect) = self.texture.view_rect(Some(name.into()));
+    pub fn set_frame(&mut self, frame: impl Into<String>) {
+        let (layer, layer_rect) = self.texture.frame(frame).expect("No frame found");
         self.layer = layer;
         self.layer_rect = layer_rect;
     }

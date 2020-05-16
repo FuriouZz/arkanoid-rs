@@ -1,6 +1,6 @@
 use super::Brick;
 use crate::pipelines::{Sprite, SpritePipeline};
-use fine::graphic::{wgpu, Gpu, TextureAtlas, AsTextureView};
+use fine::graphic::{wgpu, AsTextureView, Gpu, TextureAtlas};
 use fine::math::{Vector2, Vector4};
 
 pub struct Level {
@@ -21,9 +21,19 @@ impl Level {
             atlas.add("paddle", 2, Vector4::new(0, 100, 200, 48), None);
         });
 
+        let size = 64u32;
+        let bg_texture = fine::graphic::create_texture_color(0x0C0F1A, size, size, gpu);
+        atlas.append_raw_texture(
+            "background",
+            3,
+            gpu,
+            &bg_texture,
+            Vector4::new(0, 0, size, size),
+            None,
+        );
+
         let (w, h, ..) = atlas.dimensions();
-        let texture_binding =
-            pipeline.create_texture_binding(gpu, &atlas, w as f32, h as f32);
+        let texture_binding = pipeline.create_texture_binding(gpu, &atlas, w as f32, h as f32);
 
         let mut bricks: Vec<Sprite> = (0..width * height)
             .map(|index| {
@@ -56,11 +66,7 @@ impl Level {
         player.transform.scale(0.5);
         player.transform.translate(0.0, -200.0, 0.0);
 
-        let size = 64u32;
-        let bg_texture = fine::graphic::create_texture_color(0x0C0F1A, size, size, gpu);
-        atlas.append_raw_texture("bg", 3, gpu, &bg_texture, Vector4::new(0, 0, size, size), None);
-
-        let mut bg = Sprite::from_atlas("bg", &atlas);
+        let mut bg = Sprite::from_atlas("background", &atlas);
         bg.transform.scale(100.0);
 
         Self {
