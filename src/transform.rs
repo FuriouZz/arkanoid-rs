@@ -82,7 +82,7 @@ impl Transform {
     pub fn decompose(&self) -> (Vector3<f32>, UnitQuaternion<f32>, Vector3<f32>) {
         (
             self.i.translation.vector.clone(),
-            self.i.rotation,
+            self.i.rotation.clone(),
             self.scaling.clone(),
         )
     }

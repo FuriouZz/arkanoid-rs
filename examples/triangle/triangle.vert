@@ -5,11 +5,12 @@ out gl_PerVertex {
 };
 
 // Ouput
-layout(location = 0) out vec2 f_TexCoord;
+layout(location = 0) out vec3 f_Color;
 
 void main() {
     vec2 position = vec2(gl_VertexIndex, (gl_VertexIndex & 1) * 2) - 1;
-    vec2 texcoord = vec2(gl_VertexIndex / 2., gl_VertexIndex & 1);
-    f_TexCoord = texcoord;
+    vec3 color = vec3((min(gl_VertexIndex+1, 2) & 1), (gl_VertexIndex & 1), max(gl_VertexIndex-1, 0));
+
+    f_Color = color;
     gl_Position = vec4(position, 0., 1.0);
 }

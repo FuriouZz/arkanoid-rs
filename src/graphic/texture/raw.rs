@@ -2,7 +2,7 @@ use crate::graphic::Gpu;
 use image::DynamicImage;
 
 pub struct RawTexture {
-    texture: wgpu::Texture,
+    raw: wgpu::Texture,
     width: u32,
     height: u32,
 }
@@ -21,7 +21,7 @@ impl RawTexture {
             .create_buffer_with_data(bytes, wgpu::BufferUsage::COPY_SRC);
 
         // Create texture
-        let texture = gpu.device.create_texture(&wgpu::TextureDescriptor {
+        let raw = gpu.device.create_texture(&wgpu::TextureDescriptor {
             label: None,
             format: wgpu::TextureFormat::Bgra8Unorm,
             dimension: wgpu::TextureDimension::D2,
@@ -43,7 +43,7 @@ impl RawTexture {
                 rows_per_image: 0,
             },
             wgpu::TextureCopyView {
-                texture: &texture,
+                texture: &raw,
                 mip_level: 0,
                 array_layer: 0,
                 origin: wgpu::Origin3d::ZERO,
@@ -56,7 +56,7 @@ impl RawTexture {
         );
 
         Self {
-            texture,
+            raw,
             width,
             height,
         }
@@ -78,6 +78,6 @@ impl RawTexture {
     }
 
     pub fn as_raw(&self) -> &wgpu::Texture {
-        &self.texture
+        &self.raw
     }
 }

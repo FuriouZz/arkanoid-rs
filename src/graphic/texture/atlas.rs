@@ -51,14 +51,7 @@ impl TextureAtlas {
         }
     }
 
-    pub fn as_view(&self) -> &wgpu::TextureView {
-        &self.view
-    }
-
-    pub fn frame<S>(&self, name: S) -> &(u32, Vector4<f32>)
-    where
-        S: Into<String>,
-    {
+    pub fn frame(&self, name: impl Into<String>) -> &(u32, Vector4<f32>) {
         self.rectangles
             .get(&name.into())
             .expect("Rectangle does not exist")
@@ -184,6 +177,34 @@ impl TextureAtlas {
             height <= self.height,
             "[fine::graphic::TextureAtlas] height is bigger than the atlas height."
         );
+    }
+}
+
+impl super::AsTextureView for TextureAtlas {
+    fn view_rect(&self, name: Option<String>) -> (u32, Vector4<f32>) {
+        if let Some(name) = name {
+            let (layer, rect) = self.frame(name);
+            return (*layer, rect.clone());
+        }
+        panic!("name is missing")
+    }
+
+    fn as_view(&self) -> &wgpu::TextureView {
+        &self.view
+    }
+}
+
+impl super::AsTextureView for &TextureAtlas {
+    fn view_rect(&self, name: Option<String>) -> (u32, Vector4<f32>) {
+        if let Some(name) = name {
+            let (layer, rect) = self.frame(name);
+            return (*layer, rect.clone());
+        }
+        panic!("name is missing")
+    }
+
+    fn as_view(&self) -> &wgpu::TextureView {
+        &self.view
     }
 }
 
