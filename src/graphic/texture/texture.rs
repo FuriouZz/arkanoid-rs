@@ -9,12 +9,9 @@ pub struct Texture {
 }
 
 impl Texture {
-    pub fn from_bytes(gpu: &mut Gpu, width: u32, height: u32, bytes: &[u8]) -> Self {
-        let texture =
-            RawTexture::from_bytes(gpu, width, height, wgpu::TextureUsage::SAMPLED, bytes);
-
+    pub fn from_raw(raw: &RawTexture, width: u32, height: u32) -> Self {
         // Create texture view
-        let view = texture.as_raw().create_view(&wgpu::TextureViewDescriptor {
+        let view = raw.as_raw().create_view(&wgpu::TextureViewDescriptor {
             format: wgpu::TextureFormat::Bgra8Unorm,
             dimension: wgpu::TextureViewDimension::D2,
             aspect: wgpu::TextureAspect::default(),
@@ -29,6 +26,12 @@ impl Texture {
             width,
             height,
         }
+    }
+
+    pub fn from_bytes(gpu: &mut Gpu, width: u32, height: u32, bytes: &[u8]) -> Self {
+        let raw =
+            RawTexture::from_bytes(gpu, width, height, wgpu::TextureUsage::SAMPLED, bytes);
+        Self::from_raw(&raw, width, height)
     }
 
     pub fn from_image(gpu: &mut Gpu, img: &DynamicImage) -> Self {

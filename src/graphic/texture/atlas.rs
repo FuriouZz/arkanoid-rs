@@ -1,4 +1,4 @@
-use super::RawTexture;
+use super::{RawTexture, Texture};
 use crate::graphic::Gpu;
 use image::DynamicImage;
 use nalgebra::{Vector2, Vector4};
@@ -28,7 +28,9 @@ impl TextureAtlas {
             },
             mip_level_count: 1,
             sample_count: 1,
-            usage: wgpu::TextureUsage::SAMPLED | wgpu::TextureUsage::COPY_DST,
+            usage: wgpu::TextureUsage::SAMPLED
+                | wgpu::TextureUsage::COPY_SRC
+                | wgpu::TextureUsage::COPY_DST,
         });
 
         let view = texture.create_view(&wgpu::TextureViewDescriptor {
@@ -160,6 +162,61 @@ impl TextureAtlas {
         let (width, height) = img.dimensions();
         let bytes = &img.into_raw()[..];
         self.append_bytes(gpu, bytes, width, height, f);
+    }
+
+    pub fn frame_to_raw(&self, gpu: &mut Gpu, name: impl Into<String>) -> Option<RawTexture> {
+        self.frame(name).map(|frame| {
+            let width = frame.1[2] as u32;
+            let height = frame.1[3] as u32;
+
+            let raw = gpu.device.create_texture(&wgpu::TextureDescriptor {
+                label: Some("[fine::graphic::TextureAtlas] frame_to_raw_texture"),
+                format: wgpu::TextureFormat::Bgra8Unorm,
+                dimension: wgpu::TextureDimension::D2,
+                size: wgpu::Extent3d {
+                    width,
+                    height,
+                    depth: 1,
+                },
+                mip_level_count: 1,
+                sample_count: 1,
+                usage: wgpu::TextureUsage::COPY_DST,
+            });
+
+            gpu.encoder.copy_texture_to_texture(
+                wgpu::TextureCopyView {
+                    texture: &self.texture,
+                    array_layer: frame.0,
+                    mip_level: 0,
+                    origin: wgpu::Origin3d {
+                        x: frame.1[0] as u32,
+                        y: frame.1[1] as u32,
+                        z: 0,
+                    }
+                },
+                wgpu::TextureCopyView {
+                    texture: &raw,
+                    array_layer: 0,
+                    mip_level: 0,
+                    origin: wgpu::Origin3d::ZERO
+                },
+                wgpu::Extent3d {
+                    width,
+                    height,
+                    depth: 1,
+                },
+            );
+
+            RawTexture::new(raw, width, height)
+        })
+    }
+
+    pub fn frame_to_texture(&self, gpu: &mut Gpu, name: impl Into<String>) -> Option<Texture> {
+        self.frame_to_raw(gpu, name).map(|raw| {
+            let width = raw.width();
+            let height = raw.height();
+            Texture::from_raw(&raw, width, height)
+        })
     }
 
     fn assert(&self, width: u32, height: u32, layer: u32) {

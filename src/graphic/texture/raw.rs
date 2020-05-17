@@ -8,6 +8,10 @@ pub struct RawTexture {
 }
 
 impl RawTexture {
+    pub fn new(raw: wgpu::Texture, width: u32, height: u32) -> Self {
+        Self { raw, width, height }
+    }
+
     pub fn from_bytes(
         gpu: &mut Gpu,
         width: u32,
@@ -55,7 +59,7 @@ impl RawTexture {
             },
         );
 
-        Self { raw, width, height }
+        Self::new(raw, width, height)
     }
 
     pub fn from_image(gpu: &mut Gpu, usage: wgpu::TextureUsage, img: &DynamicImage) -> Self {
