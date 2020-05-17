@@ -15,6 +15,8 @@ pub use gpu::GpuOptions;
 pub use wgpu;
 mod texture;
 pub use texture::*;
+mod shader;
+pub use shader::Shader;
 
 pub const DEFAULT_TEXTURE_FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Bgra8Unorm;
 
