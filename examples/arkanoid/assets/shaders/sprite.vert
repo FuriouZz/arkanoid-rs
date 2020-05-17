@@ -14,6 +14,7 @@ layout(location = 6) in vec4 i_Rotation;
 // Ouput
 layout(location = 0) out vec2 f_TexCoord;
 layout(location = 1) out float f_Layer;
+layout(location = 2) out vec2 f_Ratio;
 
 // Uniforms
 layout (set = 0, binding = 1) uniform Set0 {
@@ -25,7 +26,7 @@ layout (set = 1, binding = 1) uniform Set1 {
 
 void main() {
     vec2 offset = i_LayerRect.xy / u_AtlasSize.xy;
-    vec2 ratio = i_LayerRect.zw / u_AtlasSize.xy;
+    vec2 ratio = f_Ratio = i_LayerRect.zw / u_AtlasSize.xy;
 
     f_TexCoord = (vec2(v_TexCoord.x, 1.0 - v_TexCoord.y) * ratio) + offset;
     f_Layer = i_LayerAndOrigin.x;

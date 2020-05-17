@@ -1,5 +1,5 @@
 use super::Brick;
-use crate::pipelines::{Sprite, SpritePipeline};
+use crate::pipelines::{Sprite, Pattern, SpritePipeline, sprite};
 use fine::graphic::{wgpu, AsTextureView, Gpu, TextureAtlas};
 use fine::math::{Vector2, Vector4};
 
@@ -85,9 +85,9 @@ impl Level {
     ) {
         let (gpu, attachment) = frame.target();
 
-        let it = std::iter::once(&self.bg)
-            .chain(self.bricks.iter())
-            .chain(std::iter::once(&self.player));
+        let it= std::iter::once(&self.bg)
+        .chain(self.bricks.iter())
+        .chain(std::iter::once(&self.player));
 
         pipeline.draw(gpu, attachment, camera, &self.texture_binding, it);
     }

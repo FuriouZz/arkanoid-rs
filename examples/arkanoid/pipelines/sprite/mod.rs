@@ -1,9 +1,11 @@
 mod clip;
 mod pipeline;
 mod sprite;
+mod pattern;
 pub use clip::MovieClip;
 pub use pipeline::SpritePipeline;
 pub use sprite::Sprite;
+pub use pattern::Pattern;
 mod instance;
-pub(super) use instance::AsInstance;
-pub(super) use instance::Instance;
+pub use instance::AsInstance;
+pub use instance::Instance;
