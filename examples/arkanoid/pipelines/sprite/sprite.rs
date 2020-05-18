@@ -7,6 +7,7 @@ use fine::Transform;
 pub struct Sprite {
     layer: u32,
     layer_rect: Vector4<f32>,
+    repeat: u32,
     pub transform: Transform,
     pub origin: Vector2<f32>,
 }
@@ -18,6 +19,7 @@ impl Sprite {
             layer_rect,
             transform: Transform::new(),
             origin: Vector2::new(0.5, 0.5),
+            repeat: 1,
         }
     }
 
@@ -48,6 +50,10 @@ impl Sprite {
     pub fn height(&self) -> f32 {
         self.transform.scaling()[1] * self.layer_rect[3]
     }
+
+    pub fn repeat(&mut self, count: u32) {
+        self.repeat = count;
+    }
 }
 
 impl AsInstance for &Sprite {
@@ -55,7 +61,7 @@ impl AsInstance for &Sprite {
         let (translation, rotation, scaling) = self.transform.decompose();
 
         Instance {
-            layer: Vector3::new(self.layer as f32, self.origin[0], self.origin[1]),
+            layer: Vector4::new(self.layer as f32, self.repeat as f32, self.origin[0], self.origin[1]),
             layer_rect: self.layer_rect.clone(),
             translation,
             scaling,

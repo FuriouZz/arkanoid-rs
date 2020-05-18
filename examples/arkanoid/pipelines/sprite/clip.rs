@@ -6,6 +6,7 @@ use std::rc::Rc;
 
 pub struct MovieClip {
     layer: u32,
+    repeat: u32,
     layer_rect: Vector4<f32>,
     texture: Rc<TextureAtlas>,
     pub transform: Transform,
@@ -21,6 +22,7 @@ impl MovieClip {
             texture,
             transform: Transform::new(),
             origin: Vector2::new(0.5, 0.5),
+            repeat: 1,
         }
     }
 
@@ -50,13 +52,17 @@ impl MovieClip {
     pub fn height(&self) -> f32 {
         self.transform.scaling()[1] * self.layer_rect[3]
     }
+
+    pub fn repeat(&mut self, count: u32) {
+        self.repeat = count;
+    }
 }
 
 impl AsInstance for &MovieClip {
     fn as_instance(&self) -> Instance {
         let (translation, rotation, scaling) = self.transform.decompose();
         Instance {
-            layer: Vector3::new(self.layer as f32, self.origin[0], self.origin[1]),
+            layer: Vector4::new(self.layer as f32, self.repeat as f32, self.origin[0], self.origin[1]),
             layer_rect: self.layer_rect.clone(),
             translation,
             scaling,

@@ -1,13 +1,12 @@
 use super::{AsInstance, Instance};
 use fine::graphic;
-use fine::graphic::vertex_attribute::{position_texcoord::Vertex, VertexAttributeDescriptor};
+use fine::graphic::vertex_attribute::{position::Vertex, VertexAttributeDescriptor};
 use fine::graphic::wgpu;
 use fine::math::{Matrix4, UnitQuaternion, Vector3, Vector4};
 
-fn vertex(x: f32, y: f32, z: f32, u: f32, v: f32) -> Vertex {
+fn vertex(x: f32, y: f32, z: f32) -> Vertex {
     Vertex {
         position: (x, y, z),
-        texcoord: (u, v),
     }
 }
 
@@ -32,10 +31,10 @@ impl SpritePipeline {
         let gpu = frame.gpu();
 
         let vertices: Vec<Vertex> = vec![
-            vertex(0.0, 0.0, 0., 0.0, 0.0),
-            vertex(0.0, 1.0, 0., 0.0, 1.0),
-            vertex(1.0, 1.0, 0., 1.0, 1.0),
-            vertex(1.0, 0.0, 0., 1.0, 0.0),
+            vertex(0.0, 0.0, 0.0),
+            vertex(0.0, 1.0, 0.0),
+            vertex(1.0, 1.0, 0.0),
+            vertex(1.0, 0.0, 0.0),
         ];
 
         let indices: Vec<u16> = vec![0, 1, 2, 0, 2, 3];
@@ -168,36 +167,36 @@ impl SpritePipeline {
                             stride: Instance::SIZE,
                             step_mode: wgpu::InputStepMode::Instance,
                             attributes: &[
-                                // Layer and origin
+                                // Layer, repeat and origin
                                 wgpu::VertexAttributeDescriptor {
-                                    format: wgpu::VertexFormat::Float3,
+                                    format: wgpu::VertexFormat::Float4,
                                     offset: 0,
-                                    shader_location: 2,
+                                    shader_location: 1,
                                 },
                                 // Layer Rect
                                 wgpu::VertexAttributeDescriptor {
                                     format: wgpu::VertexFormat::Float4,
-                                    offset: 3 * 4,
-                                    shader_location: 3,
+                                    offset: 4 * 4,
+                                    shader_location: 2,
                                 },
                                 // Translation
                                 wgpu::VertexAttributeDescriptor {
                                     format: wgpu::VertexFormat::Float3,
-                                    offset: 3 * 4 + 4 * 4,
-                                    shader_location: 4,
+                                    offset: 4 * 4 + 4 * 4,
+                                    shader_location: 3,
                                 },
                                 // Scaling
                                 wgpu::VertexAttributeDescriptor {
                                     format: wgpu::VertexFormat::Float3,
-                                    offset: 3 * 4 + 4 * 4 + 3 * 4,
-                                    shader_location: 5,
+                                    offset: 4 * 4 + 4 * 4 + 3 * 4,
+                                    shader_location: 4,
                                 },
                                 // Rotation
                                 wgpu::VertexAttributeDescriptor {
                                     format: wgpu::VertexFormat::Float4,
-                                    offset: 3 * 4 + 4 * 4 + 3 * 4 + 3 * 4,
-                                    shader_location: 6,
-                                },
+                                    offset: 4 * 4 + 4 * 4 + 3 * 4 + 3 * 4,
+                                    shader_location: 5,
+                                }
                             ],
                         },
                     ],

@@ -1,5 +1,5 @@
 use super::Brick;
-use crate::pipelines::{Sprite, Pattern, SpritePipeline, sprite};
+use crate::pipelines::{Sprite, SpritePipeline, sprite};
 use fine::graphic::{wgpu, AsTextureView, Gpu, TextureAtlas};
 use fine::math::{Vector2, Vector4};
 
@@ -21,14 +21,14 @@ impl Level {
             atlas.add("paddle", 2, Vector4::new(0, 100, 200, 48), None);
         });
 
-        let size = 64u32;
-        let bg_texture = fine::graphic::create_texture_color(0x0C0F1A, size, size, gpu);
+        let bg_size = 64u32;
+        let bg_texture = fine::graphic::create_texture_color(0x0C0F1A, bg_size, bg_size, gpu);
         atlas.append_raw_texture(
             "background",
             3,
             gpu,
             &bg_texture,
-            Vector4::new(0, 0, size, size),
+            Vector4::new(0, 0, bg_size, bg_size),
             None,
         );
 
@@ -67,7 +67,7 @@ impl Level {
         player.transform.translate(0.0, -200.0, 0.0);
 
         let mut bg = Sprite::from_atlas("background", &atlas);
-        bg.transform.scale(100.0);
+        bg.transform.non_uniform_scale(1440.0 / bg_size as f32, 754.0 / bg_size as f32, 1.0);
 
         Self {
             bricks,

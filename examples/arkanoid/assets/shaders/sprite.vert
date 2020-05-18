@@ -2,19 +2,17 @@
 
 // Input - PerVertex
 layout(location = 0) in vec3 v_Position;
-layout(location = 1) in vec2 v_TexCoord;
 
 // Input - PerInstance
-layout(location = 2) in vec3 i_LayerAndOrigin;
-layout(location = 3) in vec4 i_LayerRect;
-layout(location = 4) in vec3 i_Translation;
-layout(location = 5) in vec3 i_Scaling;
-layout(location = 6) in vec4 i_Rotation;
+layout(location = 1) in vec4 i_LayerAndRepeatAndOrigin;
+layout(location = 2) in vec4 i_LayerRect;
+layout(location = 3) in vec3 i_Translation;
+layout(location = 4) in vec3 i_Scaling;
+layout(location = 5) in vec4 i_Rotation;
 
 // Ouput
 layout(location = 0) out vec2 f_TexCoord;
-layout(location = 1) out float f_Layer;
-layout(location = 2) out vec2 f_Ratio;
+layout(location = 1) out vec4 f_LayerRepeatRatio;
 
 // Uniforms
 layout (set = 0, binding = 1) uniform Set0 {
@@ -26,12 +24,16 @@ layout (set = 1, binding = 1) uniform Set1 {
 
 void main() {
     vec2 offset = i_LayerRect.xy / u_AtlasSize.xy;
-    vec2 ratio = f_Ratio = i_LayerRect.zw / u_AtlasSize.xy;
+    vec2 ratio = i_LayerRect.zw / u_AtlasSize.xy;
 
-    f_TexCoord = (vec2(v_TexCoord.x, 1.0 - v_TexCoord.y) * ratio) + offset;
-    f_Layer = i_LayerAndOrigin.x;
+    f_TexCoord = (vec2(v_Position.x, 1.0 - v_Position.y) * ratio) + offset;
+    f_LayerRepeatRatio = vec4(
+        i_LayerAndRepeatAndOrigin.x,
+        i_LayerAndRepeatAndOrigin.y,
+        ratio
+    );
 
-    vec3 pos = v_Position.xyz - vec3(i_LayerAndOrigin.yz, 0.0);
+    vec3 pos = v_Position.xyz - vec3(i_LayerAndRepeatAndOrigin.zw, 0.0);
     // Scaling from vec3
     pos *= vec3(i_Scaling.xy * i_LayerRect.zw, i_Scaling.z);
     // Rotate from quaternion

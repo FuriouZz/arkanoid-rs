@@ -2,7 +2,7 @@ use fine::math::{Matrix4, UnitQuaternion, Vector3, Vector4};
 
 #[derive(Clone, Copy, Debug)]
 pub struct Instance {
-    pub(super) layer: Vector3<f32>,
+    pub(super) layer: Vector4<f32>,
     pub(super) layer_rect: Vector4<f32>,
     pub(super) translation: Vector3<f32>,
     pub(super) scaling: Vector3<f32>,
