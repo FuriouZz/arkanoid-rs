@@ -6,7 +6,7 @@ export interface IEventHandler {
   on_frame(): void;
   on_key_up(key: number): void;
   on_key_down(key: number): void;
-  on_key_press(key: number): void;
+  on_key_pressed(key: number): void;
   on_pointer_up(x: number, y: number): void;
   on_pointer_down(x: number, y: number): void;
   on_pointer_move(x: number, y: number): void;
@@ -34,9 +34,9 @@ export class EventBridge {
   }
 
   enable($canvas: HTMLCanvasElement) {
-    $canvas.addEventListener('keyup', this._onkey)
-    $canvas.addEventListener('keydown', this._onkey)
-    $canvas.addEventListener('keypress', this._onkey)
+    window.addEventListener('keyup', this._onkey)
+    window.addEventListener('keydown', this._onkey)
+    window.addEventListener('keypress', this._onkey)
     $canvas.addEventListener('pointerup', this._onpointer)
     $canvas.addEventListener('pointerdown', this._onpointer)
     $canvas.addEventListener('pointermove', this._onpointer)
@@ -46,9 +46,9 @@ export class EventBridge {
   }
 
   disable($canvas: HTMLCanvasElement) {
-    $canvas.removeEventListener('keyup', this._onkey)
-    $canvas.removeEventListener('keydown', this._onkey)
-    $canvas.removeEventListener('keypress', this._onkey)
+    window.removeEventListener('keyup', this._onkey)
+    window.removeEventListener('keydown', this._onkey)
+    window.removeEventListener('keypress', this._onkey)
     $canvas.removeEventListener('pointerup', this._onpointer)
     $canvas.removeEventListener('pointerdown', this._onpointer)
     $canvas.removeEventListener('pointermove', this._onpointer)
@@ -66,19 +66,19 @@ export class EventBridge {
 
   private _onkey(e: KeyboardEvent) {
     switch (e.type) {
-      case "canvas:keydown":
+      case "keydown":
         {
           this._handler.on_key_down(e.keyCode)
           break
         }
-      case "canvas:keyup":
+      case "keyup":
         {
           this._handler.on_key_up(e.keyCode)
           break
         }
-      case "canvas:keypress":
+      case "keypress":
         {
-          this._handler.on_key_press(e.keyCode)
+          this._handler.on_key_pressed(e.keyCode)
           break
         }
     }
@@ -86,17 +86,17 @@ export class EventBridge {
 
   private _onpointer(e: PointerEvent) {
     switch (e.type) {
-      case "canvas:pointerdown":
+      case "pointerdown":
         {
           this._handler.on_pointer_down(Math.floor(e.clientX), Math.floor(e.clientY))
           break
         }
-      case "canvas:pointerup":
+      case "pointerup":
         {
           this._handler.on_pointer_up(Math.floor(e.clientX), Math.floor(e.clientY))
           break
         }
-      case "canvas:pointermove":
+      case "pointermove":
         {
           this._handler.on_pointer_move(Math.floor(e.clientX), Math.floor(e.clientY))
           break

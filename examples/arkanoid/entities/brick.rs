@@ -1,7 +1,17 @@
 use crate::pipelines::Sprite;
-use fine::graphic::TextureAtlas;
-use std::rc::Rc;
 
 pub struct Brick {
     pub sprite: Sprite,
+}
+
+impl Brick {
+    pub fn new(sprite: Sprite) -> Self {
+        Self {
+            sprite
+        }
+    }
+
+    pub fn transform(&mut self) -> &mut fine::Transform {
+        &mut self.sprite.transform
+    }
 }

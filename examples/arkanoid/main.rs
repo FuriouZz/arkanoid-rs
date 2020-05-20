@@ -5,11 +5,15 @@ mod entities;
 mod pipelines;
 use camera::{Camera, Lens};
 use pipelines::{Sprite, SpritePipeline};
+use std::collections::HashSet;
 
 pub struct ArkanoidScene {
     camera: Camera,
     sprite: SpritePipeline,
     level: entities::Level,
+    released: bool,
+    keys: HashSet<fine::event::KeyCode>,
+    time: f32,
 }
 
 impl fine::Scene for ArkanoidScene {
@@ -25,6 +29,9 @@ impl fine::Scene for ArkanoidScene {
             level,
             sprite,
             camera: Camera::orthographic(-1.0, 1.0, -1.0, 1.0, 0.0, 100.0),
+            released: false,
+            keys: HashSet::new(),
+            time: fine::now() as f32 / 1000.0,
         }
     }
 
@@ -50,6 +57,25 @@ impl fine::Scene for ArkanoidScene {
 
                 // Resize depth map
                 self.sprite.resize(frame);
+
+                //
+                self.level.resize(width as f32, height as f32);
+            }
+            fine::event::Event::Frame => {
+                let time = fine::now() as f32 / 1000.0;
+                let dt = self.time - time;
+                self.time = time;
+
+                self.level.update(&self.keys, dt);
+            }
+            fine::event::Event::KeyDown(key) => {
+                self.keys.insert(key);
+            }
+            fine::event::Event::KeyUp(key) => {
+                self.keys.remove(&key);
+            }
+            fine::event::Event::KeyUp(fine::event::KeyCode::Space) => {
+                self.released = true;
             }
             _ => {}
         }

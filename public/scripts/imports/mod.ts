@@ -4,6 +4,6 @@ export function now() {
   return performance.now()
 }
 
-export function random() {
+export function rand() {
   return Math.random()
 }
