@@ -51,6 +51,15 @@ impl Ball {
         }
     }
 
+    pub fn update_with_brick(&mut self, brick: &mut super::Brick) {
+        let (x, y, width, height) = self.sprite.rect();
+        let (bx, by, bwidth, bheight) = brick.sprite.rect();
+
+        if x >= bx || x+width*0.5 <= bx+bwidth*0.5 || y >= by || y+height*0.5 <= by+bheight {
+            brick.alive = false;
+        }
+    }
+
     pub fn release(&mut self) {
         if !self.released {
             self.released = true;

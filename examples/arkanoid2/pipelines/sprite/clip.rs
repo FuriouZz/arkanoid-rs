@@ -1,47 +1,40 @@
 use super::{AsInstance, Instance};
-use fine::graphic::{Texture, TextureAtlas};
+use fine::graphic::TextureAtlas;
 use fine::math::{UnitQuaternion, Vector2, Vector3, Vector4};
 use fine::Transform;
+use std::rc::Rc;
 
-#[derive(Debug)]
-pub struct Sprite {
+pub struct MovieClip {
     layer: u32,
-    layer_rect: Vector4<f32>,
     repeat: u32,
+    layer_rect: Vector4<f32>,
+    texture: Rc<TextureAtlas>,
     pub transform: Transform,
     pub origin: Vector2<f32>,
 }
 
-impl Sprite {
-    pub fn from_frame(layer: u32, layer_rect: Vector4<f32>) -> Self {
+impl MovieClip {
+    pub fn new(frame: impl Into<String>, texture: Rc<TextureAtlas>) -> Self {
+        let (layer, layer_rect) = texture.frame(frame).expect("No frame found");
         Self {
             layer,
             layer_rect,
+            texture,
             transform: Transform::new(),
             origin: Vector2::new(0.5, 0.5),
             repeat: 1,
         }
     }
 
-    pub fn from_texture(texture: &Texture) -> Self {
-        Self::from_frame(
-            0,
-            Vector4::new(0.0, 0.0, texture.width() as f32, texture.height() as f32),
-        )
+    pub fn set_atlas(&mut self, frame: impl Into<String>, texture: Rc<TextureAtlas>) {
+        self.texture = texture;
+        self.set_frame(frame);
     }
 
-    pub fn from_atlas(name: &str, atlas: &TextureAtlas) -> Self {
-        let (layer, frame) = atlas.frame(name).expect("No frame found");
-        Self::from_frame(layer, frame)
-    }
-
-    pub fn rect(&self) -> (f32,f32,f32,f32) {
-        (
-            self.x(),
-            self.y(),
-            self.width(),
-            self.height(),
-        )
+    pub fn set_frame(&mut self, frame: impl Into<String>) {
+        let (layer, layer_rect) = self.texture.frame(frame).expect("No frame found");
+        self.layer = layer;
+        self.layer_rect = layer_rect;
     }
 
     pub fn x(&self) -> f32 {
@@ -65,10 +58,9 @@ impl Sprite {
     }
 }
 
-impl AsInstance for &Sprite {
+impl AsInstance for &MovieClip {
     fn as_instance(&self) -> Instance {
         let (translation, rotation, scaling) = self.transform.decompose();
-
         Instance {
             layer: Vector4::new(self.layer as f32, self.repeat as f32, self.origin[0], self.origin[1]),
             layer_rect: self.layer_rect.clone(),

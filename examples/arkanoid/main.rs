@@ -22,8 +22,7 @@ impl fine::Scene for ArkanoidScene {
         Self: Sized,
     {
         let sprite = SpritePipeline::new(&mut frame);
-        let gpu = frame.gpu();
-        let level = entities::Level::generate(8, 11, gpu, &sprite);
+        let level = entities::Level::generate(8, 11, &mut frame, &sprite);
 
         Self {
             level,
@@ -44,13 +43,11 @@ impl fine::Scene for ArkanoidScene {
                 fine::log!("Resolution {}x{}", width, height);
 
                 // Update orthographic projection
-                let right = width as f32 * 0.5;
-                let top = height as f32 * 0.5;
                 let lens = &mut self.camera.lens;
                 match lens {
                     Lens::Orthographic(o) => {
-                        o.set_left_and_right(-right, right);
-                        o.set_bottom_and_top(-top, top);
+                        o.set_left_and_right(0.0, width as f32);
+                        o.set_bottom_and_top(0.0, height as f32);
                     }
                     _ => {}
                 }

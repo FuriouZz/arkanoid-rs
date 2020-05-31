@@ -1,11 +1,12 @@
-use super::{Brick, Paddle, Ball};
+use super::{Ball, Brick, Paddle};
 use crate::pipelines::{sprite, Sprite, SpritePipeline};
 use fine::graphic::{wgpu, AsTextureView, Gpu, TextureAtlas};
+use fine::Frame;
 use fine::math::{Vector2, Vector4};
 use std::collections::HashSet;
 
 pub struct Level {
-    pub bricks: Vec<Sprite>,
+    pub bricks: Vec<Brick>,
     pub paddle: Paddle,
     pub bg: Sprite,
     pub ball: Ball,
@@ -13,7 +14,10 @@ pub struct Level {
 }
 
 impl Level {
-    pub fn generate(width: u32, height: u32, gpu: &mut Gpu, pipeline: &SpritePipeline) -> Self {
+    pub fn generate(width: u32, height: u32, frame: &mut Frame, pipeline: &SpritePipeline) -> Self {
+        let (n_widteen_height) = frame.dimensions();
+        let gpu = frame.gpu();
+
         let img =
             image::load_from_memory(&include_bytes!("../assets/images/game.png")[..]).unwrap();
         let mut atlas = TextureAtlas::new(gpu, 256, 256, 5);
@@ -47,7 +51,7 @@ impl Level {
         let (w, h, ..) = atlas.dimensions();
         let texture_binding = pipeline.create_texture_binding(gpu, &atlas, w as f32, h as f32);
 
-        let mut bricks: Vec<Sprite> = (0..width * height)
+        let mut bricks: Vec<Brick> = (0..width * height)
             .map(|index| {
                 let index = index as f32;
                 let width = width as f32;
@@ -61,7 +65,8 @@ impl Level {
                 let mut sprite = Sprite::from_atlas(frame, &atlas);
                 sprite.transform.scale(0.5);
 
-                let offset_x = 1f32 * x + (width * -0.5 * sprite.width()) + sprite.width() * 0.5 - 0.5 * (x+2.0);
+                let offset_x = 1f32 * x + (width * -0.5 * sprite.width()) + sprite.width() * 0.5
+                    - 0.5 * (x + 2.0);
                 let offset_y = 1f32 * y;
 
                 sprite.transform.translate(
@@ -70,7 +75,7 @@ impl Level {
                     0.0,
                 );
 
-                sprite
+                Brick::new(sprite)
             })
             .collect();
 
@@ -97,7 +102,11 @@ impl Level {
     }
 
     pub fn resize(&mut self, width: f32, height: f32) {
-        self.bg.transform.non_uniform_scale(width / 64.0, height / 64.0, 1.0);
+        self.bg
+            .transform
+            .non_uniform_scale(width / 64.0, height / 64.0, 1.0);
+
+        self.bg.transform.translate(width * 0.5, height * 0.5, 0.0);
     }
 
     pub fn update(&mut self, keys: &HashSet<fine::event::KeyCode>, dt: f32) {
@@ -106,6 +115,10 @@ impl Level {
 
         if keys.contains(&fine::event::KeyCode::Space) {
             self.ball.release();
+        }
+
+        for brick in self.bricks.iter_mut() {
+            self.ball.update_with_brick(brick);
         }
     }
 
@@ -118,7 +131,12 @@ impl Level {
         let (gpu, attachment) = frame.target();
 
         let it = std::iter::once(&self.bg)
-            .chain(self.bricks.iter())
+            .chain(self.bricks.iter().filter_map(|b| {
+                if b.alive {
+                    return Some(&b.sprite);
+                }
+                return None;
+            }))
             .chain(std::iter::once(&self.ball.sprite))
             .chain(std::iter::once(&self.paddle.sprite));
 

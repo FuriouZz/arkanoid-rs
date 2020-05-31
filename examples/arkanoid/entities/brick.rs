@@ -2,12 +2,14 @@ use crate::pipelines::Sprite;
 
 pub struct Brick {
     pub sprite: Sprite,
+    pub alive: bool,
 }
 
 impl Brick {
     pub fn new(sprite: Sprite) -> Self {
         Self {
-            sprite
+            sprite,
+            alive: true,
         }
     }
 

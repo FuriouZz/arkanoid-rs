@@ -18,11 +18,11 @@
         "env": {
           "RUSTFLAGS": "--cfg=web_sys_unstable_apis"
         },
-        "args": ["cargo", "build", "--target", "wasm32-unknown-unknown", "--example", "arkanoid"]
+        "args": ["cargo", "build", "--target", "wasm32-unknown-unknown", "--example", "arkanoid2"]
       },
       {
         "env": {},
-        "args": [ "wasm-bindgen", "--out-dir", "public/generated", "--web", "target/wasm32-unknown-unknown/debug/examples/arkanoid.wasm" ]
+        "args": [ "wasm-bindgen", "--out-dir", "public/generated", "--web", "target/wasm32-unknown-unknown/debug/examples/arkanoid2.wasm" ]
       }
     ],
     "*.vert": [
